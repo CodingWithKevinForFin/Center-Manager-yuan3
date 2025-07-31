@@ -7,7 +7,7 @@ import java.util.logging.Logger;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.centermanager.editor.AmiCenterManagerAddDboPortlet;
 import com.f1.ami.web.centermanager.editor.AmiCenterManagerAddIndexPortlet;
-import com.f1.ami.web.centermanager.editor.AmiCenterManagerAddTablePortlet;
+import com.f1.ami.web.centermanager.editor.AmiCenterManagerRichTableEditorPortlet;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Table;
 import com.f1.ami.web.centermanager.nuweditor.AmiCenterManagerEditMethodPortlet;
@@ -130,7 +130,7 @@ public class AmiCenterManagerEntityRelationGraphMenu {
 		AmiCenterGraphNode first = CH.first(nodes);
 		PortletManager manager = service.getPortletManager();
 		if ("add_table".equals(id)) {
-			manager.showDialog("Add Table", new AmiCenterManagerAddTablePortlet(manager.generateConfig()), 500, 550);
+			manager.showDialog("Add Table", new AmiCenterManagerRichTableEditorPortlet(manager.generateConfig(), true), 500, 550);
 		} else if ("add_trigger".equals(id)) {
 			manager.showDialog("Add Trigger", new AmiCenterManagerEditTriggerPortlet(manager.generateConfig(), true), 800, 850);
 		} else if ("add_timer".equals(id)) {

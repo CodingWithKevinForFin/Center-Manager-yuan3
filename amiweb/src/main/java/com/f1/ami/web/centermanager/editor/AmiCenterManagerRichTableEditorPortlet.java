@@ -37,35 +37,49 @@ public class AmiCenterManagerRichTableEditorPortlet extends GridPortlet {
 		this.addChild(header, 0, 0, 1, 1);
 
 		PortletManager manager = service.getPortletManager();
-
-		//parse sql
-		boolean hasIndex = tableSql.contains("CREATE INDEX");
-		String createTableScript = null;
-		if (hasIndex)
-			createTableScript = SH.beforeFirst(tableSql, "CREATE INDEX");
-		else
-			createTableScript = tableSql;
-		CreateTableNode ctn = AmiCenterManagerUtils.scriptToCreateTableNode(createTableScript);
-		Map<String, String> tableConfig = AmiCenterManagerUtils.parseAdminNode_Table(ctn);
-		String tableName = tableConfig.get("name");
-		//manager.showDialog("Edit Table", new AmiCenterManagerAddTablePortlet(manager.generateConfig(), tableConfig, AmiCenterEntityTypeConsts.EDIT), 500, 550);
-		Map<String, AmiCenterGraphNode_Trigger> triggerBinding = this.service.getCenterGraphManager().getTable(tableName).getTargetTriggers();
-
-		Map<String, AmiCenterGraphNode_Index> indexBinding = this.service.getCenterGraphManager().getTable(tableName).getTargetIndexes();
-
 		this.tableEditorTabsPortlet = new TabPortlet(generateConfig());
 		this.tableEditorTabsPortlet.getTabPortletStyle().setBackgroundColor("#4c4c4c");
-		this.tableEditorTabsPortlet.addChild("Table/Columns", isAdd ? new AmiCenterManagerEditColumnPortlet(manager.generateConfig(), true)
-				: new AmiCenterManagerEditColumnPortlet(manager.generateConfig(), createTableScript, correlationNode));
-		this.tableEditorTabsPortlet.addChild("Triggers",
-				isAdd ? new AmiCenterManagerTriggerScirptTreePortlet(manager.generateConfig(), new HashMap<String, AmiCenterGraphNode_Trigger>())
-						: new AmiCenterManagerTriggerScirptTreePortlet(manager.generateConfig(), triggerBinding));//, new HashMap<String, String>(), AmiCenterEntityTypeConsts.EDIT));
-		this.tableEditorTabsPortlet.addChild("Indexes",
-				isAdd ? new AmiCenterManagerIndexScirptTreePortlet(manager.generateConfig(), new HashMap<String, AmiCenterGraphNode_Index>(), this.tableEditorTabsPortlet)
-						: new AmiCenterManagerIndexScirptTreePortlet(manager.generateConfig(), indexBinding, this.tableEditorTabsPortlet));
+		AmiCenterManagerEditColumnPortlet cp = null;
+		AmiCenterManagerTriggerScirptTreePortlet tst = null;
+		AmiCenterManagerIndexScirptTreePortlet ist = null;
+
+		//parse sql
+		if (!isAdd) {
+			boolean hasIndex = tableSql.contains("CREATE INDEX");
+			String createTableScript = null;
+			if (hasIndex)
+				createTableScript = SH.beforeFirst(tableSql, "CREATE INDEX");
+			else
+				createTableScript = tableSql;
+			CreateTableNode ctn = AmiCenterManagerUtils.scriptToCreateTableNode(createTableScript);
+			Map<String, String> tableConfig = AmiCenterManagerUtils.parseAdminNode_Table(ctn);
+			String tableName = tableConfig.get("name");
+			//manager.showDialog("Edit Table", new AmiCenterManagerAddTablePortlet(manager.generateConfig(), tableConfig, AmiCenterEntityTypeConsts.EDIT), 500, 550);
+			Map<String, AmiCenterGraphNode_Trigger> triggerBinding = this.service.getCenterGraphManager().getTable(tableName).getTargetTriggers();
+
+			Map<String, AmiCenterGraphNode_Index> indexBinding = this.service.getCenterGraphManager().getTable(tableName).getTargetIndexes();
+
+			cp = new AmiCenterManagerEditColumnPortlet(manager.generateConfig(), createTableScript, correlationNode);
+			tst = new AmiCenterManagerTriggerScirptTreePortlet(manager.generateConfig(), triggerBinding);
+			ist = new AmiCenterManagerIndexScirptTreePortlet(manager.generateConfig(), indexBinding, this.tableEditorTabsPortlet);
+
+		} else {
+			cp = new AmiCenterManagerEditColumnPortlet(manager.generateConfig(), true);
+			tst = new AmiCenterManagerTriggerScirptTreePortlet(manager.generateConfig(), new HashMap<String, AmiCenterGraphNode_Trigger>());
+			ist = new AmiCenterManagerIndexScirptTreePortlet(manager.generateConfig(), new HashMap<String, AmiCenterGraphNode_Index>(), this.tableEditorTabsPortlet);
+		}
+
+		this.tableEditorTabsPortlet.addChild("Table/Columns", cp);
+		this.tableEditorTabsPortlet.addChild("Triggers", tst);
+		this.tableEditorTabsPortlet.addChild("Indexes", ist);
+
 		this.tableEditorTabsPortlet.setIsCustomizable(false);
 		this.addChild(this.tableEditorTabsPortlet, 0, 1, 1, 1);
 
+	}
+
+	public AmiCenterManagerRichTableEditorPortlet(PortletConfig config, boolean isAdd) {
+		this(config, null, null, isAdd);
 	}
 
 	public AmiCenterGraphNode_Table getCorrelationNode() {
