@@ -34,7 +34,7 @@ public class AmiCenterManagerEditorsManager {
 	}
 
 	public Portlet getEditorByPortletId(String id) {
-		return this.editorsByPortletId.get(id);
+		return this.editorsByPortletId.get(id) == null ? tableEditorsByPortletId.get(id) : this.editorsByPortletId.get(id);
 	}
 
 	public int getEditorsCount() {
