@@ -29,6 +29,7 @@ import com.f1.utils.casters.Caster_Boolean;
  * 
  *
  */
+@Deprecated
 public class AmiCenterManagerAddTablePortlet extends AmiCenterManagerAbstractAddObjectPortlet {
 	public static final byte GROUP_CODE_TABLE = AmiCenterGraphNode.TYPE_TABLE;
 

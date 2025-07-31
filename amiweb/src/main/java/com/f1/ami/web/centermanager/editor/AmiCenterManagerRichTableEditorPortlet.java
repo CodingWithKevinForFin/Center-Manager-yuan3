@@ -5,7 +5,6 @@ import java.util.Map;
 import com.f1.ami.portlets.AmiWebHeaderPortlet;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.AmiWebUtils;
-import com.f1.ami.web.centermanager.AmiCenterEntityConsts;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Index;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Table;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Trigger;
@@ -38,8 +37,7 @@ public class AmiCenterManagerRichTableEditorPortlet extends GridPortlet {
 
 		this.tableEditorTabsPortlet = new TabPortlet(generateConfig());
 		this.tableEditorTabsPortlet.getTabPortletStyle().setBackgroundColor("#4c4c4c");
-		this.tableEditorTabsPortlet.addChild("Info", new AmiCenterManagerAddTablePortlet(manager.generateConfig(), tableConfig, AmiCenterEntityConsts.EDIT));
-		this.tableEditorTabsPortlet.addChild("Columns", new AmiCenterManagerEditColumnPortlet(manager.generateConfig(), tableConfig));
+		this.tableEditorTabsPortlet.addChild("Table/Columns", new AmiCenterManagerEditColumnPortlet(manager.generateConfig(), tableConfig));
 		this.tableEditorTabsPortlet.addChild("Triggers", new AmiCenterManagerTriggerScirptTreePortlet(manager.generateConfig(), triggerBinding));//, new HashMap<String, String>(), AmiCenterEntityTypeConsts.EDIT));
 		this.tableEditorTabsPortlet.addChild("Indexes", new AmiCenterManagerIndexScirptTreePortlet(manager.generateConfig(), indexBinding, this.tableEditorTabsPortlet));
 		this.tableEditorTabsPortlet.setIsCustomizable(false);
