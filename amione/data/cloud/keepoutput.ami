@@ -1,0 +1,106 @@
+{
+  "includeFiles":[
+  ],
+  "metadata":{
+    "customPrefsImportMode":"reject",
+    "dm":{
+    },
+    "fileVersion":3,
+    "menubarPosition":"top",
+    "rt":{
+    },
+    "stm":{
+      "styles":[
+        {
+          "id":"LAYOUT_DEFAULT",
+          "lb":"Layout Default",
+          "pt":"DEFAULT"
+        }
+      ]
+    },
+    "transientIdPrefix":"TRANSIENT_"
+  },
+  "portletConfigs":[
+    {
+      "portletBuilderId":"amidesktop",
+      "portletConfig":{
+        "amiPanelId":"@DESKTOP",
+        "amiStyle":{
+          "pt":"LAYOUT_DEFAULT"
+        },
+        "windows":[
+          {
+            "header":true,
+            "heightDflt":492,
+            "hidden":false,
+            "leftDflt":360,
+            "portlet":"Html1",
+            "pos":0,
+            "stateDflt":"flt",
+            "title":"Window",
+            "topDflt":380,
+            "widthDflt":1066,
+            "zindexDflt":3
+          }
+        ]
+      }
+    },
+    {
+      "portletBuilderId":"amiform",
+      "portletConfig":{
+        "amiPanelId":"Html1",
+        "amiStyle":{
+          "pt":"LAYOUT_DEFAULT"
+        },
+        "fields":[
+          {
+            "callbacks":{
+              "entries":[
+                {
+                  "amiscript":[
+                    "if(isOn){\n",
+                    "  create public table if not exists test(id int);\n",
+                    "  insert into test values(1);\n",
+                    "  table t = select * from test;\n",
+                    "  session.alert(t);\n",
+                    "}else{\n",
+                    " \n",
+                    "{  int i= select * from test;\n",
+                    "session.alert(i);\n",
+                    "}\n",
+                    "  catch (Error e){\n",
+                    "    session.alert(e);\n",
+                    "  }\n",
+                    "\n",
+                    "}"
+                  ],
+                  "keepTableset":true,
+                  "linkedVariables":[
+                    {
+                      "ari":"FIELDVALUE:Html1?checkbox?",
+                      "varName":"isOn"
+                    }
+                  ],
+                  "name":"onChange"
+                }
+              ]
+            },
+            "heightPx":20,
+            "l":"Checkbox",
+            "leftPosPx":100,
+            "n":"checkbox",
+            "style":{
+              "pt":"LAYOUT_DEFAULT"
+            },
+            "t":"checkbox",
+            "topPosPx":20,
+            "widthPx":20,
+            "zidx":1
+          }
+        ],
+        "snap":20,
+        "upid":"Html1"
+      }
+    }
+  ]
+}

@@ -1,0 +1,3 @@
+ReplicationName|TargetTable|SourceCenter|SourceTable|Mapping|Options|
+"algo_replication"|"algos"|"yuan_debuggerRefactor"|"algos"|||
+"o_replication"|"orders"|"yuan_debuggerRefactor"|"orders"|||

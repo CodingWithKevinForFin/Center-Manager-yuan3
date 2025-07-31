@@ -1,0 +1,48 @@
+[
+  {
+    "pref":{
+      "divOffsetPct":0.801125703564728
+    },
+    "upid":"Div1"
+  },
+  {
+    "pref":{
+      "windows":[
+        {
+          "height":558,
+          "left":290,
+          "name":"Window",
+          "state":"active",
+          "top":83,
+          "width":1066,
+          "zindex":1
+        }
+      ]
+    },
+    "upid":"Desktop"
+  },
+  {
+    "pref":{
+      "PinnedColumnCount":0,
+      "VisibleColumns":[
+        {
+          "name":"Url",
+          "width":93
+        },
+        {
+          "name":"Cert File",
+          "width":59
+        },
+        {
+          "name":"Password",
+          "width":67
+        },
+        {
+          "name":"Center Name",
+          "width":149
+        }
+      ]
+    },
+    "upid":"__CENTER1"
+  }
+]

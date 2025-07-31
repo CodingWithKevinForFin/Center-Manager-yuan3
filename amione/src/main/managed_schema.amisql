@@ -1,0 +1,149 @@
+/* DO NOT MODIFY THIS FILE WHILE AMI IS RUNNING, CONTENTS ARE MODIFIED BY AMI  */
+
+/*CUSTOM METHODS*/
+
+
+
+/*TABLES AND INDEXES*/
+
+CREATE PUBLIC TABLE CommRawRisk(Name String,Country String,Currency String,`Settlement Currency` String,`Underlying Currency` String,
+                                positionType String,`Portfolio Manager` String,Portfolio String,Strategy String,`Sub Strategy` String,
+                                Book String,Exchange String,amount Integer) USE RefreshPeriodMs="100" OnUndefColumn="REJECT" InitialCapacity="100";
+
+
+CREATE PUBLIC TABLE DV01RawRisk(Name String,Country String,Currency String,`Settlement Currency` String,`Underlying Currency` String,
+                                positionType String,`Portfolio Manager` String,Portfolio String,Strategy String,`Sub Strategy` String,
+                                Book String,Exchange String,Total Float,`12M` Float,`24M` Float,
+                                `3Y` Float,`5Y` Float,`10Y` Float,`20Y` Float) USE RefreshPeriodMs="100" OnUndefColumn="REJECT" InitialCapacity="100";
+
+
+CREATE PUBLIC TABLE EquitiesRawRisk(Name String,Country String,Currency String,`Settlement Currency` String,`Underlying Currency` String,
+                                    positionType String,`Portfolio Manager` String,Portfolio String,Strategy String,`Sub Strategy` String,
+                                    Book String,Exchange String,amount Integer) USE RefreshPeriodMs="100" OnUndefColumn="REJECT" InitialCapacity="100";
+
+
+CREATE PUBLIC TABLE FXDV01RawRisk(Name String,Country String,Currency String,`Settlement Currency` String,`Underlying Currency` String,
+                                  positionType String,`Portfolio Manager` String,Portfolio String,Strategy String,`Sub Strategy` String,
+                                  Book String,Exchange String,Total Float,`1M` Float,`3M` Float,
+                                  `6M` Float,`12M` Float,`3Y` Float,`5Y` Float) USE RefreshPeriodMs="100" OnUndefColumn="REJECT" InitialCapacity="100";
+
+
+CREATE PUBLIC TABLE FXRawRisk(Name String,Country String,Currency String,`Settlement Currency` String,`Underlying Currency` String,
+                              positionType String,`Portfolio Manager` String,Portfolio String,Strategy String,`Sub Strategy` String,
+                              Book String,Exchange String,Total Float,AUD String,BRL String,
+                              CAD String,CHF String,CNH String,CNY String,CZK String,
+                              EUR String,GBP String,HKD String,IDR String,INR String,
+                              JPY String,KRW String,NZD String,PLN String,SGD String,
+                              TWD String,USD String) USE RefreshPeriodMs="100" OnUndefColumn="REJECT" InitialCapacity="100";
+
+
+CREATE PUBLIC TABLE HeadlessTrigger(shouldStart Boolean,shouldStop Boolean) USE PersistEngine="FAST" RefreshPeriodMs="100" OnUndefColumn="REJECT" InitialCapacity="100";
+
+
+CREATE PUBLIC TABLE RiskMetricsTimestamp(ts String) USE RefreshPeriodMs="100" OnUndefColumn="REJECT" InitialCapacity="100";
+
+
+
+/*TIMERS*/
+CREATE TIMER CommoditiesSimulator OFTYPE AMISCRIPT ON "5000" PRIORITY 0 USE script="
+list tickerList = select Ticker from CommoditiesData;
+int count = rand(tickerList.size());
+for (int i = 0; i < count; ++i) {
+  int index = rand(tickerList.size());
+  String ticker = tickerList.get(index);
+  UPDATE CommoditiesData SET Price = (rand() -(rand() /2)), ContractValue = (Currency == \"USD\" ? \"#N/A Field Not Applicable\" : \"\" + (rand()-(rand()*2))), DeltaTMinusOne = rand()-(rand()*2) where Ticker == ticker;
+}
+";
+
+CREATE TIMER EquitiesSimulator OFTYPE AMISCRIPT ON "5000" PRIORITY 0 USE script="
+list tickerList = select Ticker from EquitiesData;
+int count = rand(tickerList.size());
+for (int i = 0; i < count; ++i) {
+  int index = rand(tickerList.size());
+  String ticker = tickerList.get(index);
+  UPDATE EquitiesData SET Price = (rand() -(rand() /2)), ContractValue = (Currency == \"USD\" ? \"#N/A Field Not Applicable\" : \"\" + (rand()-(rand()*2))), DeltaTMinusOne = rand()-(rand()*2) where Ticker == ticker;
+}
+";
+
+CREATE TIMER FxSimulator OFTYPE AMISCRIPT ON "1000" PRIORITY 0 USE script="
+List fx = Select Currency FROM FX;
+if (fx.size() == 0)
+  return;
+List accounts = SELECT Name FROM FXDelta;
+if (accounts.size() == 0)
+  return;
+int count = rand(5);
+for (int i = 0; i < count; ++i) {
+  int index = rand(fx.size());
+  INSERT INTO FX VALUES (fx.get(index), rand()-(rand()/2), rand()-(rand()/2));
+}
+count = rand(5);
+for (int i = 0; i < count; ++i) {
+  int index = rand(fx.size());
+  int accountIndex = rand(accounts.size());
+  INSERT INTO FXDelta VALUES (fx.get(index), \"${accounts.get(accountIndex)}\", rand()-(rand()/2));
+}
+";
+
+CREATE TIMER RatesSimulator OFTYPE AMISCRIPT ON "5000" PRIORITY 0 USE script="
+List fx = select Currency from FX;
+if (fx.size() == 0)
+  return;
+List cols = new List(\"OneYear\", \"TwoYear\", \"ThreeYear\", \"FiveYear\", \"TenYear\", \"TwentyYear\");
+List cols2 = new List(\"OneMonth\", \"ThreeMonth\", \"SixMonth\", \"OneYear\", \"ThreeYear\", \"FiveYear\");
+int count = rand(fx.size());
+count = rand(fx.size());
+for (int i = 0; i < count; ++i) {
+  int index = rand(fx.size());
+  int colIdx = rand(cols2.size());
+  String colName = cols2.get(colIdx);
+  if (colName == \"OneMonth\"){
+    INSERT INTO XccyRates (Currency, OneMonth) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"ThreeMonth\"){
+    INSERT INTO XccyRates (Currency, ThreeMonth) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"SixMonth\"){
+    INSERT INTO XccyRates (Currency, SixMonth) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"OneYear\"){
+    INSERT INTO XccyRates (Currency, OneYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"ThreeYear\"){
+    INSERT INTO XccyRates (Currency, ThreeYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"FiveYear\"){
+    INSERT INTO XccyRates (Currency, FiveYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+}
+
+count = rand(fx.size());
+for (int i = 0; i < count; ++i) {
+  int index = rand(fx.size());
+  int colIdx = rand(cols.size());
+  String colName = cols.get(colIdx);
+  if (colName == \"OneYear\"){
+    INSERT INTO IRSRates (Currency, OneYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"TwoYear\"){
+    INSERT INTO IRSRates (Currency, TwoYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"ThreeYear\"){
+    INSERT INTO IRSRates (Currency, ThreeYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"FiveYear\"){
+    INSERT INTO IRSRates (Currency, FiveYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"TenYear\"){
+    INSERT INTO IRSRates (Currency, TenYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+  else if (colName == \"TwentyYear\"){
+    INSERT INTO IRSRates (Currency, TwentyYear) VALUES (fx.get(index), round(rand()-(rand()/2), 2));
+  }
+}
+";
+
+
+/*PROCEDURES*/
+
+/*MULTI-TABLE TRIGGERS*/
