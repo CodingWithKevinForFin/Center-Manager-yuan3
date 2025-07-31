@@ -9,12 +9,13 @@ import com.f1.ami.amicommon.AmiUtils;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsRequest;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsResponse;
 import com.f1.ami.amicommon.msg.AmiDatasourceColumn;
-import com.f1.ami.portlets.AmiWebHeaderPortlet;
 import com.f1.ami.web.AmiWebFormatterManager;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.AmiWebUtils;
 import com.f1.ami.web.centermanager.AmiCenterEntityConsts;
 import com.f1.ami.web.centermanager.AmiCenterManagerUtils;
+import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Table;
+import com.f1.ami.web.centermanager.nuweditor.AmiCenterManagerAbstractEditCenterObjectPortlet;
 import com.f1.base.Action;
 import com.f1.base.Row;
 import com.f1.base.Table;
@@ -27,10 +28,9 @@ import com.f1.suite.web.portal.PortletConfig;
 import com.f1.suite.web.portal.PortletManager;
 import com.f1.suite.web.portal.impl.DividerPortlet;
 import com.f1.suite.web.portal.impl.FastTablePortlet;
-import com.f1.suite.web.portal.impl.GridPortlet;
-import com.f1.suite.web.portal.impl.HtmlPortlet;
 import com.f1.suite.web.portal.impl.form.FormPortlet;
 import com.f1.suite.web.portal.impl.form.FormPortletCheckboxField;
+import com.f1.suite.web.portal.impl.form.FormPortletField;
 import com.f1.suite.web.portal.impl.form.FormPortletSelectField;
 import com.f1.suite.web.portal.impl.form.FormPortletTextField;
 import com.f1.suite.web.table.WebColumn;
@@ -43,66 +43,52 @@ import com.f1.utils.casters.Caster_Boolean;
 import com.f1.utils.casters.Caster_String;
 import com.f1.utils.concurrent.HasherMap;
 import com.f1.utils.impl.CaseInsensitiveHasher;
+import com.f1.utils.string.sqlnode.CreateTableNode;
 import com.f1.utils.structs.Tuple2;
 import com.f1.utils.structs.table.BasicTable;
 import com.f1.utils.structs.table.SmartTable;
 
-public class AmiCenterManagerEditColumnPortlet extends GridPortlet implements WebContextMenuListener, WebContextMenuFactory {
+public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractEditCenterObjectPortlet implements WebContextMenuListener, WebContextMenuFactory {
 
 	final private AmiWebService service;
-	private AmiWebHeaderPortlet header;
-	private HtmlPortlet tableIcon;
+
 	private FormPortlet tableInfoPortlet;
+
+	private FormPortletTextField tableNameField;
+	private FormPortletSelectField<String> tablePersistEngineField;
+	private FormPortletCheckboxField tableBroadCastField;
+	private FormPortletTextField tableRefreshPeriodMsField;
+	private FormPortletSelectField<String> tableOnUndefColumnField;
+	private FormPortletTextField tableInitialCapacityField;
+
 	private FastTablePortlet columnMetadata;
-	private String tableName;
 
 	private AmiCenterManagerColumnMetaDataEditForm columnMetaDataEditForm;
 
 	private static final String BG_GREY = "_bg=#4c4c4c";
 
-	public AmiCenterManagerEditColumnPortlet(PortletConfig config, Map<String, String> tableConfig) {
-		super(config);
+	public AmiCenterManagerEditColumnPortlet(PortletConfig config, boolean isAdd) {
+		super(config, isAdd);
 		this.service = AmiWebUtils.getService(getManager());
 		PortletManager manager = service.getPortletManager();
-		//tableInfo:
-		String tableName = tableConfig.get("name");
-		this.tableName = tableName;
-		String persistengine = tableConfig.get("PersistEngine");
 
-		//init portlets(tableForm and header)
-		//TODO:Should I use amiwebheaderportlet?
-		this.header = new AmiWebHeaderPortlet(generateConfig());
-		this.header.setShowSearch(false);
-		StringBuilder legendHtml = new StringBuilder();
-		legendHtml.append("<div style=\"height:100%; width:100%;>");
-		String legendIconPrefix = "<div style=\"display:inline-flex; position:relative; \"><div style=\"margin:auto; position:relative;\"><div class=\"";
-		String legendIconMiddle = "\"></div><div style=\"width:100%; color:white; text-align:center;\">";
-		String legendIconSuffix = "</div></div></div>";
-		legendHtml.append(legendIconPrefix + "ami_datamodeler_ds" + legendIconMiddle + "Datasource" + legendIconSuffix);
-
-		this.tableIcon = new HtmlPortlet(generateConfig());
-		this.tableIcon.setHtml(legendHtml.toString());
-
-		this.header.setLegendWidth(300);
-		this.header.updateLegendPortletLayout(legendHtml.toString());
-
-		//init grid
 		tableInfoPortlet = new FormPortlet(manager.generateConfig());
-		FormPortletTextField tableNameField = new FormPortletTextField("Table Name");
-		FormPortletSelectField<Short> persistEngineField = new FormPortletSelectField<Short>(short.class, "PersistEngine");
-		tableNameField.setBorderColor("4c4c4c");
-		tableNameField.setValue(tableName);
-		tableNameField.setDisabled(true);
-		persistEngineField.setBorderColor("4c4c4c");
-		persistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_CODE_NONE, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE);
-		persistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_CODE_FAST, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_FAST);
-		persistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_CODE_HISTORICAL, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_HISTORICAL);
-		persistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_CODE_TEXT, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_TEXT);
-		persistEngineField.setValue(AmiCenterManagerUtils.toTablePersistEngineCode(persistengine));
-		persistEngineField.setDisabled(true);
-		tableInfoPortlet.addField(tableNameField);
-		tableInfoPortlet.addField(persistEngineField);
-		tableInfoPortlet.getFormPortletStyle().setCssStyle("_bg=#ffffff");
+		tableNameField = tableInfoPortlet.addField(new FormPortletTextField("Name"));
+		tablePersistEngineField = tableInfoPortlet.addField(new FormPortletSelectField<String>(String.class, "PersistEngine"));
+		tablePersistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE);
+		tablePersistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_FAST, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_FAST);
+		tablePersistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_HISTORICAL, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_HISTORICAL);
+		tablePersistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_TEXT, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_TEXT);
+
+		tableBroadCastField = tableInfoPortlet.addField(new FormPortletCheckboxField("Broadcast"));
+		tableRefreshPeriodMsField = tableInfoPortlet.addField(new FormPortletTextField("RefreshPeriodMs"));
+
+		tableOnUndefColumnField = tableInfoPortlet.addField(new FormPortletSelectField<String>(String.class, "OnUndefColumn"));
+		tableOnUndefColumnField.addOption(AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_REJECT, AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_REJECT);
+		tableOnUndefColumnField.addOption(AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_IGNORE, AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_IGNORE);
+		tableOnUndefColumnField.addOption(AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_ADD, AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_ADD);
+
+		tableInitialCapacityField = tableInfoPortlet.addField(new FormPortletTextField("InitialCapacity"));
 
 		//init table
 		this.columnMetadata = new FastTablePortlet(generateConfig(), new BasicTable(new String[] { "columnName", "dataType", "options", "noNull", "position" }),
@@ -121,18 +107,30 @@ public class AmiCenterManagerEditColumnPortlet extends GridPortlet implements We
 		this.columnMetadata.getTable().addMenuListener(this);
 		//have the ability to create and respond to menu items
 		this.columnMetadata.getTable().setMenuFactory(this);
-		this.columnMetaDataEditForm = new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), tableName, AmiCenterManagerColumnMetaDataEditForm.MODE_EDIT);
+		this.columnMetaDataEditForm = new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), null, AmiCenterManagerColumnMetaDataEditForm.MODE_EDIT);
 
 		DividerPortlet div = new DividerPortlet(generateConfig(), true, this.columnMetadata, this.columnMetaDataEditForm);
 
-		this.addChild(tableIcon, 0, 0, 1, 1).setPadding(0, 0, 20, 20);
-		this.addChild(tableInfoPortlet, 1, 0, 1, 1);
+		this.addChild(tableInfoPortlet, 0, 0, 1, 1);
 		//		this.addChild(columnMetadata, 0, 1, 1, 1);
 		//		this.addChild(columnMetaDataEditForm, 1, 1, 1, 1);
-		this.addChild(div, 0, 1, 2, 4);
+		this.addChild(div, 0, 1, 1, 2);
+		div.setOffsetFromTopPx(500);
 		sendAuth();
-		initColumnMetadata(tableName);
+		if (!isAdd) {
+			//initColumnMetadata(tableName);
+			this.tableInfoPortlet.addField(enableEditingCheckbox);
+			enableEditingCheckbox.setWidth(20).setHeightPx(DEFAULT_ROWHEIGHT).setLeftPosPx(DEFAULT_LEFTPOS + NAME_WIDTH + TYPE_WIDTH + DEFAULT_X_SPACING * 3 + 60)
+					.setTopPosPx(DEFAULT_TOPPOS);
+		}
 
+	}
+
+	public AmiCenterManagerEditColumnPortlet(PortletConfig config, String tableSql, AmiCenterGraphNode_Table correlationNode) {
+		this(config, false);
+		this.correlationNode = correlationNode;
+		this.importFromText(tableSql, new StringBuilder());
+		enableEdit(false);
 	}
 
 	public SmartTable getColumnTable() {
@@ -167,31 +165,6 @@ public class AmiCenterManagerEditColumnPortlet extends GridPortlet implements We
 		AmiCenterQueryDsRequest request = prepareRequest();
 		request.setQuery(query);
 		service.sendRequestToBackend(this, request);
-	}
-
-	private AmiCenterQueryDsRequest prepareRequest() {
-		AmiCenterQueryDsRequest request = getManager().getTools().nw(AmiCenterQueryDsRequest.class);
-
-		int timeout = 60;
-		try {
-			timeout = (int) (timeout * 1000);
-		} catch (Exception e) {
-			getManager().showAlert("Timeout is not in a valid format");
-			return null;
-		}
-
-		request.setTimeoutMs(timeout);
-		request.setQuerySessionKeepAlive(true);
-		request.setInvokedBy(service.getUserName());
-		request.setSessionVariableTypes(null);
-		request.setSessionVariables(null);
-		request.setAllowSqlInjection(false);//String template, dflt to false
-		request.setPermissions(AmiCenterQueryDsRequest.PERMISSIONS_FULL);
-		request.setType(AmiCenterQueryDsRequest.TYPE_QUERY);
-		request.setOriginType(AmiCenterQueryDsRequest.ORIGIN_FRONTEND_SHELL);
-		request.setDatasourceName("AMI");
-		request.setLimit(-1);
-		return request;
 	}
 
 	@Override
@@ -246,14 +219,14 @@ public class AmiCenterManagerEditColumnPortlet extends GridPortlet implements We
 			actionMode = AmiCenterManagerColumnMetaDataEditForm.ACTION_DROP;
 			targetColumnName = SH.afterFirst(action, "drop_column_");
 			dialogTitle = "Drop Column";
-			String query = "ALTER TABLE " + this.tableName + " DROP " + targetColumnName;
+			String query = "ALTER TABLE " + "foo" + " DROP " + targetColumnName;
 			getManager().showDialog("Drop Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
 					AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
 			return;
 		}
 
 		getManager().showDialog(dialogTitle,
-				new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), this.tableName, AmiCenterManagerColumnMetaDataEditForm.MODE_ADD, targetColumnName, actionMode),
+				new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), null, AmiCenterManagerColumnMetaDataEditForm.MODE_ADD, targetColumnName, actionMode),
 				AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
 
 	}
@@ -421,6 +394,83 @@ public class AmiCenterManagerEditColumnPortlet extends GridPortlet implements We
 		m.add(new BasicWebMenuLink("Drop Column", true, "drop_column_" + origColumnName));
 
 		return m;
+	}
+
+	@Override
+	public void onSpecialKeyPressed(FormPortlet formPortlet, FormPortletField<?> field, int keycode, int mask, int cursorPosition) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public WebMenu createMenu(FormPortlet formPortlet, FormPortletField<?> field, int cursorPosition) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void onContextMenu(FormPortlet portlet, String action, FormPortletField node) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public String prepareUseClause() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String preparePreUseClause() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String exportToText() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void importFromText(String text, StringBuilder sink) {
+		CreateTableNode cn = AmiCenterManagerUtils.scriptToCreateTableNode(text);
+		Map<String, String> tableConfig = AmiCenterManagerUtils.parseAdminNode_Table(cn);
+		String tableName = tableConfig.get("name");
+		initColumnMetadata(tableName);
+		for (Entry<String, String> e : tableConfig.entrySet()) {
+			String key = e.getKey();
+			String value = e.getValue();
+			if ("PersistEngine".equals(key)) {
+				String valueToSet = value == null ? AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE : value;
+				tablePersistEngineField.setValue(valueToSet);
+				tablePersistEngineField.setDefaultValue(valueToSet);
+			} else if ("BroadCast".equals(key)) {
+				Boolean boolVal = Caster_Boolean.INSTANCE.cast(value);
+				boolVal = boolVal == null ? true : boolVal;//dflt is true
+				tableBroadCastField.setValue(boolVal);
+				tableBroadCastField.setDefaultValue(boolVal);
+			} else if ("RefreshPeriodMs".equals(key)) {
+				tableRefreshPeriodMsField.setValue(value);
+				tableRefreshPeriodMsField.setDefaultValue(value);
+			} else if ("OnUndefColumn".equals(key)) {
+				tableOnUndefColumnField.setValue(value);
+				tableOnUndefColumnField.setDefaultValue(value);
+			} else if ("InitialCapacity".equals(key)) {
+				tableInitialCapacityField.setValue(value);
+				tableInitialCapacityField.setDefaultValue(value);
+			}
+		}
+
+	}
+
+	@Override
+	public void enableEdit(boolean enable) {
+		for (FormPortletField<?> fpf : this.tableInfoPortlet.getFormFields()) {
+			if (fpf != this.enableEditingCheckbox)
+				fpf.setDisabled(!enable);
+		}
+
 	}
 
 }

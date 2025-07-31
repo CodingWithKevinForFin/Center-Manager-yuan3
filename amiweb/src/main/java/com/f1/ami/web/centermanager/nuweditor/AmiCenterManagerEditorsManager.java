@@ -8,7 +8,6 @@ import java.util.Set;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.centermanager.editor.AmiCenterManagerRichTableEditorPortlet;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode;
-import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Index;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Procedure;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Table;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Timer;
@@ -47,19 +46,18 @@ public class AmiCenterManagerEditorsManager {
 		return editorsIds;
 	}
 
-	public AmiCenterManagerRichTableEditorPortlet showEditTablePortlet(Map<String, String> tableConfig, Map<String, AmiCenterGraphNode_Trigger> triggerBinding,
-			Map<String, AmiCenterGraphNode_Index> indexBinding, AmiCenterGraphNode_Table node) {
+	public AmiCenterManagerRichTableEditorPortlet showEditTablePortlet(String sql, AmiCenterGraphNode_Table node) {
 		for (AmiCenterManagerRichTableEditorPortlet i : this.tableEditorsByPortletId.values()) {
 			if (i.getCorrelationNode() == node) {
 				PortletHelper.ensureVisible(i);
 				return i;
 			}
 		}
-		AmiCenterManagerRichTableEditorPortlet editor = new AmiCenterManagerRichTableEditorPortlet(generateConfig(), tableConfig, triggerBinding, indexBinding, node);
+		AmiCenterManagerRichTableEditorPortlet editor = new AmiCenterManagerRichTableEditorPortlet(generateConfig(), sql, node, false);
 		String portletId = editor.getPortletId();
 		Window w = this.service.getDesktop().getDesktop().addChild("Edit Table", editor);
 
-		this.service.getDesktop().applyEditModeStyle(w, 800, 850);
+		this.service.getDesktop().applyEditModeStyle(w, 1200, 1250);
 		this.service.getPortletManager().onPortletAdded(editor);
 
 		this.tableEditorsByPortletId.put(portletId, editor);

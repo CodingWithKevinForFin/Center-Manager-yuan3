@@ -71,7 +71,6 @@ import com.f1.utils.SH;
 import com.f1.utils.casters.Caster_String;
 import com.f1.utils.concurrent.IdentityHashSet;
 import com.f1.utils.string.sqlnode.AdminNode;
-import com.f1.utils.string.sqlnode.CreateTableNode;
 import com.f1.utils.structs.LongKeyMap;
 import com.f1.utils.structs.table.derived.DerivedCellCalculator;
 
@@ -1028,43 +1027,26 @@ public class AmiWebCenterManagerPortlet extends GridPortlet implements AmiWebGra
 					AdminNode n = null;
 					switch (target) {
 						case "TABLE":
-							String tableScript = Caster_String.INSTANCE.cast(r.get("SQL"));
-							boolean hasIndex = tableScript.contains("CREATE INDEX");
-							String createTableScript = null;
-							if (hasIndex)
-								createTableScript = SH.beforeFirst(tableScript, "CREATE INDEX");
-							else
-								createTableScript = tableScript;
-							CreateTableNode ctn = AmiCenterManagerUtils.scriptToCreateTableNode(createTableScript);
-							Map<String, String> tableConfig = AmiCenterManagerUtils.parseAdminNode_Table(ctn);
-							//manager.showDialog("Edit Table", new AmiCenterManagerAddTablePortlet(manager.generateConfig(), tableConfig, AmiCenterEntityTypeConsts.EDIT), 500, 550);
-							Map<String, AmiCenterGraphNode_Trigger> triggerBinding = this.tableNodeByNames.get(name).getTargetTriggers();
-							Map<String, AmiCenterGraphNode_Index> indexBinding = this.tableNodeByNames.get(name).getTargetIndexes();
+							String tableSql = Caster_String.INSTANCE.cast(r.get("SQL"));
 							AmiCenterGraphNode_Table correlationNodeTable = tableNodeByNames.get(name);
-							this.service.getAmiCenterManagerEditorsManager().showEditTablePortlet(tableConfig, triggerBinding, indexBinding, correlationNodeTable);
-							//							manager.showDialog("Rich Table Editor",
-							//									new AmiCenterManagerRichTableEditorPortlet(manager.generateConfig(), tableConfig, triggerBinding, indexBinding, correlationNodeTable), 1350,
-							//									1500);
+							this.service.getAmiCenterManagerEditorsManager().showEditTablePortlet(tableSql, correlationNodeTable);
 
 							break;
 						case "TRIGGER":
 							String triggerSql = Caster_String.INSTANCE.cast(r.get("SQL"));
 							AmiCenterGraphNode_Trigger correlationNodeTrigger = triggerNodeByNames.get(name);
 							this.service.getAmiCenterManagerEditorsManager().showEditCenterObjectPortlet(triggerSql, correlationNodeTrigger);
-							//manager.showDialog("Edit Trigger", new AmiCenterManagerEditTriggerPortlet(manager.generateConfig(), triggerSql, correlationNode), 800, 850);
 							break;
 						case "TIMER":
 							String timerSql = Caster_String.INSTANCE.cast(r.get("SQL"));
 							timerSql = SH.beforeFirst(timerSql, "DISABLE TIMER");
 							AmiCenterGraphNode_Timer correlationNodeTimer = timerNodeByNames.get(name);
 							this.service.getAmiCenterManagerEditorsManager().showEditCenterObjectPortlet(timerSql, correlationNodeTimer);
-							//manager.showDialog("Edit Timer", new AmiCenterManagerEditTimerPortlet(manager.generateConfig(), timerSql), 800, 850);
 							break;
 						case "PROCEDURE":
 							String procedureSql = Caster_String.INSTANCE.cast(r.get("SQL"));
 							AmiCenterGraphNode_Procedure correlationNodeProcedure = procedureNodeByNames.get(name);
 							this.service.getAmiCenterManagerEditorsManager().showEditCenterObjectPortlet(procedureSql, correlationNodeProcedure);
-							//manager.showDialog("Edit Procedure", new AmiCenterManagerEditProcedurePortlet(manager.generateConfig(), procedureSql), 800, 850);
 							break;
 						case "METHOD":
 							String methodScript = Caster_String.INSTANCE.cast(r.get("SQL"));
