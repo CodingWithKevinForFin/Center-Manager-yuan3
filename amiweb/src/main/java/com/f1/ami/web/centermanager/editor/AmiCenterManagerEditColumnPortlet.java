@@ -1,5 +1,6 @@
 package com.f1.ami.web.centermanager.editor;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,7 +10,6 @@ import com.f1.ami.amicommon.AmiUtils;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsRequest;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsResponse;
 import com.f1.ami.amicommon.msg.AmiDatasourceColumn;
-import com.f1.ami.web.AmiWebCustomColumn;
 import com.f1.ami.web.AmiWebFormatterManager;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.AmiWebUtils;
@@ -67,7 +67,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	private FastTablePortlet columnMetadata;
 	private boolean enableColumnEditing = false;
-	private HasherMap<String, AmiWebCustomColumn> editableColumnIds = new HasherMap<String, AmiWebCustomColumn>();
+	private HasherMap<String, TableEditableColumn> editableColumnIds = new HasherMap<String, TableEditableColumn>();
 
 	private AmiCenterManagerColumnMetaDataEditForm columnMetaDataEditForm;
 
@@ -95,7 +95,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		tableOnUndefColumnField.addOption(AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_ADD, AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_ADD);
 
 		tableInitialCapacityField = tableInfoPortlet.addField(new FormPortletTextField("InitialCapacity"));
-
+		tableInfoPortlet.addFormPortletListener(this);
 		//init table
 		this.columnMetadata = new FastTablePortlet(generateConfig(), new BasicTable(new String[] { "columnName", "dataType", "options", "noNull", "position" }),
 				"Column Configuration");
@@ -105,6 +105,16 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.columnMetadata.getTable().addColumn(true, "Options", "options", fm.getBasicFormatter());
 		this.columnMetadata.getTable().addColumn(true, "NoNull", "noNull", fm.getBasicFormatter());
 		this.columnMetadata.getTable().addColumn(true, "Position", "position", fm.getIntegerWebCellFormatter());
+		//note: position column is uneditable
+		editableColumnIds.put("columnName", new TableEditableColumn("columnName", WebColumnEditConfig.EDIT_TEXTFIELD));
+		editableColumnIds.put("dataType",
+				new TableEditableColumn("dataType",
+						Arrays.asList(new String[] { AmiConsts.TYPE_NAME_STRING, AmiConsts.TYPE_NAME_LONG, AmiConsts.TYPE_NAME_INTEGER, AmiConsts.TYPE_NAME_BYTE,
+								AmiConsts.TYPE_NAME_SHORT, AmiConsts.TYPE_NAME_DOUBLE, AmiConsts.TYPE_NAME_FLOAT, AmiConsts.TYPE_NAME_BOOLEAN, AmiConsts.TYPE_NAME_UTC,
+								AmiConsts.TYPE_NAME_UTCN, AmiConsts.TYPE_NAME_BINARY, AmiConsts.TYPE_NAME_ENUM, AmiConsts.TYPE_NAME_CHAR, AmiConsts.TYPE_NAME_BIGINT,
+								AmiConsts.TYPE_NAME_BIGDEC, AmiConsts.TYPE_NAME_COMPLEX, AmiConsts.TYPE_NAME_UUID })));
+		editableColumnIds.put("options", new TableEditableColumn("options", WebColumnEditConfig.EDIT_TEXTFIELD));
+		editableColumnIds.put("nonull", new TableEditableColumn("nonull", WebColumnEditConfig.EDIT_CHECKBOX));
 		this.columnMetadata.getTable().sortRows("position", true, true, false);
 		this.columnMetadata.setDialogStyle(AmiWebUtils.getService(getManager()).getUserDialogStyleManager());
 		this.columnMetadata.addOption(FastTablePortlet.OPTION_TITLE_BAR_COLOR, "#6f6f6f");
@@ -484,6 +494,11 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	public void enableColumnEditing(boolean enable) {
 		this.enableColumnEditing = enable;
+	}
+
+	@Override
+	public void onFieldValueChanged(FormPortlet portlet, FormPortletField<?> field, Map<String, String> attributes) {
+		super.onFieldValueChanged(portlet, field, attributes);
 	}
 
 	@Override
