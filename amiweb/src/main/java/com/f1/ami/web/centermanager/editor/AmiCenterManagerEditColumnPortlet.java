@@ -130,7 +130,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.columnMetadata.getTable().addColumn(true, "Options", "options", fm.getBasicFormatter());
 		this.columnMetadata.getTable().addColumn(true, "NoNull", "noNull", fm.getBasicFormatter());
 		this.columnMetadata.getTable().addColumn(true, "Position", "position", fm.getIntegerWebCellFormatter());
-		//note: position column is uneditable
+		this.columnMetadata.getTable().hideColumn("position");
 		editableColumnIds.put("columnName", new TableEditableColumn("columnName", WebColumnEditConfig.EDIT_TEXTFIELD));
 		editableColumnIds.put("dataType",
 				new TableEditableColumn("dataType",
@@ -152,9 +152,9 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.userChangesTable = new FastTablePortlet(generateConfig(), new BasicTable(new Class<?>[] { String.class, String.class, String.class, String.class },
 				new String[] { "editObject", "editAttribute", "editType", "description" }), "User Changes");
 
-		this.userChangesTable.getTable().addColumn(true, "Edit Object", "editObject", fm.getBasicFormatter()).setWidth(80);
-		this.userChangesTable.getTable().addColumn(true, "Edit Attribute", "editAttribute", fm.getBasicFormatter()).setWidth(80);
-		this.userChangesTable.getTable().addColumn(true, "Edit Type", "editType", fm.getBasicFormatter()).setWidth(80);
+		this.userChangesTable.getTable().addColumn(true, "Edit Object", "editObject", fm.getBasicFormatter()).setWidth(100);
+		this.userChangesTable.getTable().addColumn(true, "Edit Attribute", "editAttribute", fm.getBasicFormatter()).setWidth(100);
+		this.userChangesTable.getTable().addColumn(true, "Edit Type", "editType", fm.getBasicFormatter()).setWidth(100);
 		this.userChangesTable.getTable().addColumn(true, "Description", "description", fm.getBasicFormatter()).setWidth(550);
 		DividerPortlet div1 = new DividerPortlet(generateConfig(), false, this.userChangesTable, this.columnMetadata);
 
@@ -168,6 +168,10 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		div.setOffsetFromTopPx(500);
 		sendAuth();
 
+	}
+
+	private void insertEmptyRow() {
+		this.columnMetadata.addRow(null, null, null, null, null);
 	}
 
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, String tableSql, AmiCenterGraphNode_Table correlationNode) {
@@ -224,7 +228,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			for (Row r : t.getRows()) {
 				String columnName = (String) r.get("ColumnName");
 				String dataType = (String) r.get("DataType");
-				String options = (String) r.get("Options");
+				String options = SH.noNull((String) r.get("Options"));//null is considered empty string
 				Boolean noNull = (Boolean) r.get("NoNull");
 				Integer position = (Integer) r.get("Position");
 				this.columnMetadata.addRow(columnName, dataType, options, noNull, position);
@@ -246,7 +250,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	@Override
 	public void onUserDblclick(FastWebColumns columns, String action, Map<String, String> properties) {
 		//edit logic goes here
-		if (this.enableColumnEditing) {
+		if (this.enableColumnEditing || this.isAdd) {
 			int selectedCount = this.columnMetadata.getTable().getSelectedRows().size();
 			if (selectedCount == 1)
 				onUserEditStart();
@@ -278,10 +282,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			return;
 		}
 
-		getManager().showDialog(dialogTitle,
-				new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), null, AmiCenterManagerColumnMetaDataEditForm.MODE_ADD, targetColumnName, actionMode),
-				AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
-
 	}
 
 	@Override
@@ -291,6 +291,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void onCellMousedown(WebTable table, Row row, WebColumn col) {
+		if (row.containsValue(null))
+			return;
 		this.columnMetaDataEditForm.resetForm();
 		String dataType = (String) row.get("dataType");
 		String columnName = (String) row.get("columnName");
@@ -439,14 +441,18 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	@Override
 	public WebMenu createMenu(WebTable table) {
 		FastWebTable ftw = (FastWebTable) table;
-		int origRowPos = ftw.getActiveRow().getLocation();
-		String origColumnName = (String) ftw.getActiveRow().get("columnName");
 		BasicWebMenu m = new BasicWebMenu();
-		m.add(new BasicWebMenuLink("Add Column Before " + origColumnName, true, "add_column_before_" + origColumnName));
-		m.add(new BasicWebMenuLink("Add Column After " + origColumnName, true, "add_column_after_" + origColumnName));
-		m.add(new BasicWebMenuLink("Drop Column", true, "drop_column_" + origColumnName));
+		m.add(new BasicWebMenuLink("add_column", true, "add_column"));
+		if (ftw.getActiveRow() != null) {
+			int origRowPos = ftw.getActiveRow().getLocation();
+			String origColumnName = (String) ftw.getActiveRow().get("columnName");
+			m.add(new BasicWebMenuLink("Add Column Before " + origColumnName, true, "add_column_before_" + origColumnName));
+			m.add(new BasicWebMenuLink("Add Column After " + origColumnName, true, "add_column_after_" + origColumnName));
+			m.add(new BasicWebMenuLink("Drop Column", true, "drop_column_" + origColumnName));
+			return m;
+		}
 
-		return m;
+		return null;
 	}
 
 	@Override
@@ -463,7 +469,9 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void onContextMenu(FormPortlet portlet, String action, FormPortletField node) {
-		// TODO Auto-generated method stub
+		if ("add_column".equals(action)) {
+			insertEmptyRow();
+		}
 
 	}
 
@@ -543,6 +551,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			getManager().showAlert(errorSink.toString());
 			return;
 		}
+		//need to calculate new position for the added row
+
 		if (editedTable.getSize() == 0) {
 			this.columnMetadata.finishEdit();
 			return;
