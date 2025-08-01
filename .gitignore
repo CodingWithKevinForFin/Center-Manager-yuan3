@@ -4,4 +4,4 @@ amione/
 **/org*
 **/.*
 !.gitignore
-
+**/pom.properties
