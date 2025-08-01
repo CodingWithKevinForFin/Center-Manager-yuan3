@@ -65,8 +65,12 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 	final private FormPortlet form;
 	final private AmiWebService service;
 
+	private FormPortletTitleField columnTitleField;
 	private FormPortletTextField columnNameEditField;
 	private FormPortletSelectField<Byte> dataTypeEditField;
+
+	private FormPortletTitleField storageTitleField;
+
 	private FormPortletCheckboxField noNullEditField;
 	private FormPortletCheckboxField noBroadcastEditField;
 
@@ -92,6 +96,7 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 
 	//this cache is set when the row from the table is clicked
 	private Map<String, String> columnCache = new HashMap<String, String>();
+	private static final int LEFTPOS = 150;
 
 	public AmiCenterManagerColumnMetaDataEditForm(PortletConfig config, String tableName, byte mode) {
 		super(config);
@@ -104,11 +109,16 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		this.form.addMenuListener(this);
 		this.form.addFormPortletListener(this);
 		this.addChild(form);
-		form.addField(new FormPortletTitleField("COLUMN:"));
-		this.columnNameEditField = new FormPortletTextField("Column Name" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML);
+		columnTitleField = form.addField(new FormPortletTitleField("COLUMN:"));
+		columnTitleField.setLeftPosPx(LEFTPOS);
+
+		this.columnNameEditField = this.form.addField(new FormPortletTextField("Column Name" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML));
 		this.columnNameEditField.setName(VARNAME_COLUMN_NAME);
-		this.dataTypeEditField = new FormPortletSelectField<Byte>(Byte.class, "Data Type" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML);
+		this.columnNameEditField.setLeftPosPx(LEFTPOS).setTopPosPx(40).setWidthPx(400).setHeight(25);
+
+		this.dataTypeEditField = this.form.addField(new FormPortletSelectField<Byte>(Byte.class, "Data Type" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML));
 		this.dataTypeEditField.setName(VARNAME_COLUMN_DATA_TYPE);
+		this.dataTypeEditField.setLeftPosPx(LEFTPOS).setTopPosPx(80).setWidthPx(400).setHeight(25);
 		dataTypeEditField.addOption(AmiDatasourceColumn.TYPE_NONE, "<NONE>");
 		dataTypeEditField.addOption(AmiDatasourceColumn.TYPE_STRING, AmiConsts.TYPE_NAME_STRING);
 		dataTypeEditField.addOption(AmiDatasourceColumn.TYPE_BINARY, AmiConsts.TYPE_NAME_BINARY);
@@ -128,6 +138,9 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		dataTypeEditField.addOption(AmiDatasourceColumn.TYPE_UUID, AmiConsts.TYPE_NAME_UUID);
 		dataTypeEditField.setDefaultValue(AmiDatasourceColumn.TYPE_NONE);
 
+		//add storage title
+		storageTitleField = this.form.addField(new FormPortletTitleField("STORAGE"));
+		storageTitleField.setLeftPosPx(LEFTPOS).setTopPosPx(120);
 		//common fields
 		this.noNullEditField = new FormPortletCheckboxField(AmiConsts.NONULL);
 		this.noNullEditField.setName(AmiConsts.NONULL);
@@ -145,8 +158,6 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 			noBroadcastEditField.setDisabled(true);
 		}
 
-		this.form.addField(columnNameEditField);
-		this.form.addField(dataTypeEditField);
 		this.form.addField(noNullEditField);
 		this.form.addField(noBroadcastEditField);
 
