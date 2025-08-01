@@ -9,6 +9,7 @@ import com.f1.ami.amicommon.AmiUtils;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsRequest;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsResponse;
 import com.f1.ami.amicommon.msg.AmiDatasourceColumn;
+import com.f1.ami.web.AmiWebCustomColumn;
 import com.f1.ami.web.AmiWebFormatterManager;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.AmiWebUtils;
@@ -27,7 +28,9 @@ import com.f1.suite.web.menu.impl.BasicWebMenuLink;
 import com.f1.suite.web.portal.PortletConfig;
 import com.f1.suite.web.portal.PortletManager;
 import com.f1.suite.web.portal.impl.DividerPortlet;
+import com.f1.suite.web.portal.impl.FastTableEditListener;
 import com.f1.suite.web.portal.impl.FastTablePortlet;
+import com.f1.suite.web.portal.impl.WebColumnEditConfig;
 import com.f1.suite.web.portal.impl.form.FormPortlet;
 import com.f1.suite.web.portal.impl.form.FormPortletCheckboxField;
 import com.f1.suite.web.portal.impl.form.FormPortletField;
@@ -48,7 +51,8 @@ import com.f1.utils.structs.Tuple2;
 import com.f1.utils.structs.table.BasicTable;
 import com.f1.utils.structs.table.SmartTable;
 
-public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractEditCenterObjectPortlet implements WebContextMenuListener, WebContextMenuFactory {
+public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractEditCenterObjectPortlet
+		implements WebContextMenuListener, WebContextMenuFactory, FastTableEditListener {
 
 	final private AmiWebService service;
 
@@ -62,6 +66,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	private FormPortletTextField tableInitialCapacityField;
 
 	private FastTablePortlet columnMetadata;
+	private boolean enableColumnEditing = false;
+	private HasherMap<String, AmiWebCustomColumn> editableColumnIds = new HasherMap<String, AmiWebCustomColumn>();
 
 	private AmiCenterManagerColumnMetaDataEditForm columnMetaDataEditForm;
 
@@ -107,6 +113,9 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.columnMetadata.getTable().addMenuListener(this);
 		//have the ability to create and respond to menu items
 		this.columnMetadata.getTable().setMenuFactory(this);
+
+		//enable table editing
+
 		this.columnMetaDataEditForm = new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), null, AmiCenterManagerColumnMetaDataEditForm.MODE_EDIT);
 
 		DividerPortlet div = new DividerPortlet(generateConfig(), true, this.columnMetadata, this.columnMetaDataEditForm);
@@ -194,10 +203,19 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		prepareRequestToBackend("SHOW COLUMNS WHERE TableName ==" + "\"" + t + "\";");
 	}
 
+	private void onUserEditStart() {
+		if (!this.columnMetadata.isEditing())
+			this.columnMetadata.startEdit(columnMetadata.getTable().getSelectedRows(), this.editableColumnIds, this);
+	}
+
 	@Override
 	public void onUserDblclick(FastWebColumns columns, String action, Map<String, String> properties) {
-		// TODO Auto-generated method stub
-
+		//edit logic goes here
+		if (this.enableColumnEditing) {
+			int selectedCount = this.columnMetadata.getTable().getSelectedRows().size();
+			if (selectedCount == 1)
+				onUserEditStart();
+		}
 	}
 
 	@Override
@@ -464,11 +482,94 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	}
 
+	public void enableColumnEditing(boolean enable) {
+		this.enableColumnEditing = enable;
+	}
+
 	@Override
 	public void enableEdit(boolean enable) {
 		for (FormPortletField<?> fpf : this.tableInfoPortlet.getFormFields()) {
 			if (fpf != this.enableEditingCheckbox)
 				fpf.setDisabled(!enable);
+		}
+		enableColumnEditing(enable);
+
+	}
+
+	@Override
+	public void onTableEditComplete(Table origTable, Table editedTable, FastTablePortlet fastTablePortlet, StringBuilder errorSink) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onTableEditAbort(FastTablePortlet fastTablePortlet) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onEditCell(int x, int y, String v) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public Object getEditOptions(WebColumnEditConfig cfg, Row row) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public static class TableEditableColumn implements WebColumnEditConfig {
+		private String columnId;
+		private String editOptionFormula;
+		private List<String> editSelectOptions;
+		private byte editType;//checkbox, textfield, select
+
+		public TableEditableColumn(String columnId, byte editType) {
+			this.columnId = columnId;
+			this.editType = editType;
+		}
+
+		public TableEditableColumn(String columnId, List<String> editSelectOptions) {
+			this(columnId, WebColumnEditConfig.EDIT_SELECT);
+			this.editSelectOptions = editSelectOptions;
+		}
+
+		@Override
+		public String getEditId() {
+			return getColumnId();
+		}
+
+		@Override
+		public String getColumnId() {
+			return columnId;
+		}
+
+		@Override
+		public String getEditOptionFormula() {
+			return editOptionFormula;
+		}
+
+		@Override
+		public List<String> getEditSelectOptions() {
+			return editSelectOptions;
+		}
+
+		@Override
+		public byte getEditType() {
+			return editType;
+		}
+
+		@Override
+		public String getEnableLastNDays() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public boolean getDisableFutureDays() {
+			throw new UnsupportedOperationException();
+
 		}
 
 	}
