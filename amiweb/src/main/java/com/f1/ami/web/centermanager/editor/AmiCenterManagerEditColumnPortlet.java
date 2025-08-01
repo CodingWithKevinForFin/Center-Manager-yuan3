@@ -531,8 +531,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void onTableEditAbort(FastTablePortlet fastTablePortlet) {
-		// TODO Auto-generated method stub
-
+		//This is unsupported
+		return;
 	}
 
 	@Override
