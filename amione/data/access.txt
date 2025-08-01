@@ -1,9 +1,0 @@
-#Each line represents a user, Syntax is: USERNAME|PASSWORD|Key1=Value1|Key2=Value2|....
-#Optional keys include: ISDEV, ISADMIN, MAXSESSIONS, DEFAULT_LAYOUT, LAYOUTS, amiscript.variable.<varname>, amiscript.db.variable.<varname>  
-demo|demo123|ISADMIN=true|ISDEV=true|
-test|test123|ISADMIN=false|ISDEV=false|
-test2|test123|ISADMIN=true|ISDEV=false|
-test3|test123|ISADMIN=false|ISDEV=true|
-
-readonly|EFafsdf~d8{X#|AMIDB_PERMISSIONS=read
-sample|sample|ami_layout_shared=sample.ami
