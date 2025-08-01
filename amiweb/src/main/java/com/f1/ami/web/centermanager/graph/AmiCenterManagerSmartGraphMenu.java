@@ -6,7 +6,6 @@ import java.util.Map;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.centermanager.editor.AmiCenterManagerAddDboPortlet;
 import com.f1.ami.web.centermanager.editor.AmiCenterManagerAddIndexPortlet;
-import com.f1.ami.web.centermanager.editor.AmiCenterManagerAddTablePortlet;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode;
 import com.f1.ami.web.centermanager.nuweditor.AmiCenterManagerEditMethodPortlet;
 import com.f1.ami.web.dm.AmiWebDm;
@@ -113,16 +112,13 @@ public class AmiCenterManagerSmartGraphMenu {
 	static public void onMenuItemAddAction(AmiWebService service, String id) {
 		PortletManager manager = service.getPortletManager();
 		if ("add_table".equals(id)) {
-			manager.showDialog("Add Table", new AmiCenterManagerAddTablePortlet(manager.generateConfig()), 500, 550);
+			service.getAmiCenterManagerEditorsManager().showAddTablePortlet();
 		} else if ("add_trigger".equals(id)) {
 			service.getAmiCenterManagerEditorsManager().showAddCenterObjectPortlet(AmiCenterGraphNode.TYPE_TRIGGER);
-			//manager.showDialog("Add Trigger", new AmiCenterManagerEditTriggerPortlet(manager.generateConfig(), true), 800, 850);
 		} else if ("add_timer".equals(id)) {
 			service.getAmiCenterManagerEditorsManager().showAddCenterObjectPortlet(AmiCenterGraphNode.TYPE_TIMER);
-			//manager.showDialog("Add Timer", new AmiCenterManagerEditTimerPortlet(manager.generateConfig(), true), 800, 850);
 		} else if ("add_procedure".equals(id)) {
 			service.getAmiCenterManagerEditorsManager().showAddCenterObjectPortlet(AmiCenterGraphNode.TYPE_PROCEDURE);
-			//manager.showDialog("Add Procedure", new AmiCenterManagerEditProcedurePortlet(manager.generateConfig(), true), 800, 850);
 		} else if ("add_index".equals(id)) {
 			manager.showDialog("Add Index", new AmiCenterManagerAddIndexPortlet(manager.generateConfig()), 500, 550);
 		} else if ("add_method".equals(id)) {

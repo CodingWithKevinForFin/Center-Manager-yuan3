@@ -64,6 +64,17 @@ public class AmiCenterManagerEditorsManager {
 		return editor;
 	}
 
+	public AmiCenterManagerRichTableEditorPortlet showAddTablePortlet() {
+		AmiCenterManagerRichTableEditorPortlet editor = new AmiCenterManagerRichTableEditorPortlet(generateConfig(), true);
+		Window w = this.service.getDesktop().getDesktop().addChild("Edit Table", editor);
+
+		this.service.getDesktop().applyEditModeStyle(w, 1200, 1250);
+		this.service.getPortletManager().onPortletAdded(editor);
+		String portletId = editor.getPortletId();
+		this.tableEditorsByPortletId.put(portletId, editor);
+		return editor;
+	}
+
 	public AmiCenterManagerAbstractEditCenterObjectPortlet showEditCenterObjectPortlet(String sql, AmiCenterGraphNode node) {
 		for (AmiCenterManagerAbstractEditCenterObjectPortlet i : this.editorsByPortletId.values()) {
 			if (i.getCorrelationNode() == node) {
