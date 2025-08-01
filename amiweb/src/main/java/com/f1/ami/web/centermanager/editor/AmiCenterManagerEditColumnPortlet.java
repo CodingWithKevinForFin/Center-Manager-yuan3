@@ -18,6 +18,7 @@ import com.f1.ami.web.centermanager.AmiCenterManagerUtils;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode_Table;
 import com.f1.ami.web.centermanager.nuweditor.AmiCenterManagerAbstractEditCenterObjectPortlet;
 import com.f1.base.Action;
+import com.f1.base.Column;
 import com.f1.base.Row;
 import com.f1.base.Table;
 import com.f1.container.ResultMessage;
@@ -36,11 +37,14 @@ import com.f1.suite.web.portal.impl.form.FormPortletCheckboxField;
 import com.f1.suite.web.portal.impl.form.FormPortletField;
 import com.f1.suite.web.portal.impl.form.FormPortletSelectField;
 import com.f1.suite.web.portal.impl.form.FormPortletTextField;
+import com.f1.suite.web.table.WebCellFormatter;
 import com.f1.suite.web.table.WebColumn;
 import com.f1.suite.web.table.WebContextMenuFactory;
 import com.f1.suite.web.table.WebContextMenuListener;
 import com.f1.suite.web.table.WebTable;
 import com.f1.suite.web.table.fast.FastWebTable;
+import com.f1.suite.web.table.impl.NumberWebCellFormatter;
+import com.f1.suite.web.table.impl.WebCellStyleWrapperFormatter;
 import com.f1.utils.SH;
 import com.f1.utils.casters.Caster_Boolean;
 import com.f1.utils.casters.Caster_String;
@@ -97,8 +101,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		tableInitialCapacityField = tableInfoPortlet.addField(new FormPortletTextField("InitialCapacity"));
 		tableInfoPortlet.addFormPortletListener(this);
 		//init table
-		this.columnMetadata = new FastTablePortlet(generateConfig(), new BasicTable(new String[] { "columnName", "dataType", "options", "noNull", "position" }),
-				"Column Configuration");
+		this.columnMetadata = new FastTablePortlet(generateConfig(), new BasicTable(new Class<?>[] { String.class, String.class, String.class, Boolean.class, Integer.class },
+				new String[] { "columnName", "dataType", "options", "noNull", "position" }), "Column Configuration");
 		AmiWebFormatterManager fm = service.getFormatterManager();
 		this.columnMetadata.getTable().addColumn(true, "Column Name", "columnName", fm.getBasicFormatter()).setWidth(150);
 		this.columnMetadata.getTable().addColumn(true, "Data Type", "dataType", fm.getBasicFormatter());
@@ -114,7 +118,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 								AmiConsts.TYPE_NAME_UTCN, AmiConsts.TYPE_NAME_BINARY, AmiConsts.TYPE_NAME_ENUM, AmiConsts.TYPE_NAME_CHAR, AmiConsts.TYPE_NAME_BIGINT,
 								AmiConsts.TYPE_NAME_BIGDEC, AmiConsts.TYPE_NAME_COMPLEX, AmiConsts.TYPE_NAME_UUID })));
 		editableColumnIds.put("options", new TableEditableColumn("options", WebColumnEditConfig.EDIT_TEXTFIELD));
-		editableColumnIds.put("nonull", new TableEditableColumn("nonull", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("noNull", new TableEditableColumn("noNull", WebColumnEditConfig.EDIT_CHECKBOX));
 		this.columnMetadata.getTable().sortRows("position", true, true, false);
 		this.columnMetadata.setDialogStyle(AmiWebUtils.getService(getManager()).getUserDialogStyleManager());
 		this.columnMetadata.addOption(FastTablePortlet.OPTION_TITLE_BAR_COLOR, "#6f6f6f");
@@ -513,8 +517,16 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void onTableEditComplete(Table origTable, Table editedTable, FastTablePortlet fastTablePortlet, StringBuilder errorSink) {
-		// TODO Auto-generated method stub
-
+		if (errorSink.length() > 0) {
+			this.columnMetadata.finishEdit();
+			getManager().showAlert(errorSink.toString());
+			return;
+		}
+		if (editedTable.getSize() == 0) {
+			this.columnMetadata.finishEdit();
+			return;
+		}
+		this.columnMetadata.finishEdit();
 	}
 
 	@Override
@@ -525,14 +537,33 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void onEditCell(int x, int y, String v) {
-		// TODO Auto-generated method stub
-
+		final WebColumn pos = this.columnMetadata.getTable().getVisibleColumn(x);
+		final String[] cols = pos.getTableColumns();
+		final Column col = this.columnMetadata.getTable().getTable().getColumn(cols[0]);
+		WebCellFormatter f = pos.getCellFormatter();
+		if (f instanceof WebCellStyleWrapperFormatter)
+			f = ((WebCellStyleWrapperFormatter) f).getInner();
+		final Object v2;
+		if (f instanceof NumberWebCellFormatter) {
+			NumberWebCellFormatter f2 = (NumberWebCellFormatter) f;
+			try {
+				v2 = SH.isEmpty(v) ? null : f2.getFormatter().parse(v);
+			} catch (Exception e) {
+				return;
+			}
+		} else
+			v2 = v;
+		final Object cast = col.getTypeCaster().cast(v2, false, false);
+		if (y < this.columnMetadata.getTable().getRowsCount())
+			this.columnMetadata.getTable().getRow(y).putAt(col.getLocation(), cast);
 	}
 
 	@Override
 	public Object getEditOptions(WebColumnEditConfig cfg, Row row) {
-		// TODO Auto-generated method stub
-		return null;
+		//convert List<String> to comma-delimetered strings
+		List<String> listOptions = cfg.getEditSelectOptions();
+		String strOptions = SH.join(',', listOptions);
+		return strOptions;
 	}
 
 	public static class TableEditableColumn implements WebColumnEditConfig {
