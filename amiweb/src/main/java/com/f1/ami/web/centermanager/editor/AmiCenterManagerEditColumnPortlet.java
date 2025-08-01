@@ -31,6 +31,7 @@ import com.f1.suite.web.portal.PortletManager;
 import com.f1.suite.web.portal.impl.DividerPortlet;
 import com.f1.suite.web.portal.impl.FastTableEditListener;
 import com.f1.suite.web.portal.impl.FastTablePortlet;
+import com.f1.suite.web.portal.impl.GridPortlet;
 import com.f1.suite.web.portal.impl.WebColumnEditConfig;
 import com.f1.suite.web.portal.impl.form.FormPortlet;
 import com.f1.suite.web.portal.impl.form.FormPortletCheckboxField;
@@ -69,13 +70,16 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	private FormPortletSelectField<String> tableOnUndefColumnField;
 	private FormPortletTextField tableInitialCapacityField;
 
-	private FastTablePortlet columnMetadata;
+	final private FastTablePortlet columnMetadata;
+	final private FastTablePortlet userChangesTable;
 	private boolean enableColumnEditing = false;
 	private HasherMap<String, TableEditableColumn> editableColumnIds = new HasherMap<String, TableEditableColumn>();
 
 	private AmiCenterManagerColumnMetaDataEditForm columnMetaDataEditForm;
 
 	private static final String BG_GREY = "_bg=#4c4c4c";
+	private static final int LEFTPOS = 120;
+	private static final int TOPPOS = 20;
 
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, boolean isAdd) {
 		super(config, isAdd);
@@ -83,22 +87,39 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		PortletManager manager = service.getPortletManager();
 
 		tableInfoPortlet = new FormPortlet(manager.generateConfig());
-		tableNameField = tableInfoPortlet.addField(new FormPortletTextField("Name"));
+		//ROW1
+		tableNameField = tableInfoPortlet.addField(new FormPortletTextField("Table Name"));
+		tableNameField.setLeftPosPx(LEFTPOS).setTopPosPx(TOPPOS).setWidthPx(300).setHeightPx(DEFAULT_ROWHEIGHT);
+
+		if (!isAdd) {
+			//initColumnMetadata(tableName);
+			this.tableInfoPortlet.addField(enableEditingCheckbox);
+			enableEditingCheckbox.setLeftPosPx(LEFTPOS + 400).setTopPosPx(TOPPOS).setWidthPx(50).setHeightPx(DEFAULT_ROWHEIGHT);
+		}
+		//ROW2
 		tablePersistEngineField = tableInfoPortlet.addField(new FormPortletSelectField<String>(String.class, "PersistEngine"));
 		tablePersistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE);
 		tablePersistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_FAST, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_FAST);
 		tablePersistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_HISTORICAL, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_HISTORICAL);
 		tablePersistEngineField.addOption(AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_TEXT, AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_TEXT);
+		tablePersistEngineField.setLeftPosPx(LEFTPOS).setTopPosPx(TOPPOS + 40).setWidthPx(100).setHeightPx(DEFAULT_ROWHEIGHT);
 
 		tableBroadCastField = tableInfoPortlet.addField(new FormPortletCheckboxField("Broadcast"));
+		tableBroadCastField.setLeftPosPx(LEFTPOS + 200).setTopPosPx(TOPPOS + 40).setWidthPx(50).setHeightPx(DEFAULT_ROWHEIGHT);
+
+		//ROW3
 		tableRefreshPeriodMsField = tableInfoPortlet.addField(new FormPortletTextField("RefreshPeriodMs"));
+		tableRefreshPeriodMsField.setLeftPosPx(LEFTPOS).setTopPosPx(TOPPOS + 80).setWidthPx(150).setHeightPx(DEFAULT_ROWHEIGHT);
 
 		tableOnUndefColumnField = tableInfoPortlet.addField(new FormPortletSelectField<String>(String.class, "OnUndefColumn"));
 		tableOnUndefColumnField.addOption(AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_REJECT, AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_REJECT);
 		tableOnUndefColumnField.addOption(AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_IGNORE, AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_IGNORE);
 		tableOnUndefColumnField.addOption(AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_ADD, AmiCenterEntityConsts.ON_UNDEF_COLUMN_OPTION_ADD);
-
+		tableOnUndefColumnField.setLeftPosPx(LEFTPOS + 270).setTopPosPx(TOPPOS + 80).setWidthPx(150).setHeightPx(DEFAULT_ROWHEIGHT);
+		//ROW4
 		tableInitialCapacityField = tableInfoPortlet.addField(new FormPortletTextField("InitialCapacity"));
+		tableInitialCapacityField.setLeftPosPx(LEFTPOS).setTopPosPx(TOPPOS + 120).setWidthPx(150).setHeightPx(DEFAULT_ROWHEIGHT);
+
 		tableInfoPortlet.addFormPortletListener(this);
 		//init table
 		this.columnMetadata = new FastTablePortlet(generateConfig(), new BasicTable(new Class<?>[] { String.class, String.class, String.class, Boolean.class, Integer.class },
@@ -128,24 +149,24 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		//have the ability to create and respond to menu items
 		this.columnMetadata.getTable().setMenuFactory(this);
 
-		//enable table editing
+		this.userChangesTable = new FastTablePortlet(generateConfig(), new BasicTable(new Class<?>[] { String.class, String.class, String.class, String.class },
+				new String[] { "editObject", "editAttribute", "editType", "description" }), "User Changes");
+
+		this.userChangesTable.getTable().addColumn(true, "Edit Object", "editObject", fm.getBasicFormatter()).setWidth(80);
+		this.userChangesTable.getTable().addColumn(true, "Edit Attribute", "editAttribute", fm.getBasicFormatter()).setWidth(80);
+		this.userChangesTable.getTable().addColumn(true, "Edit Type", "editType", fm.getBasicFormatter()).setWidth(80);
+		this.userChangesTable.getTable().addColumn(true, "Description", "description", fm.getBasicFormatter()).setWidth(550);
+		DividerPortlet div1 = new DividerPortlet(generateConfig(), false, this.userChangesTable, this.columnMetadata);
 
 		this.columnMetaDataEditForm = new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), null, AmiCenterManagerColumnMetaDataEditForm.MODE_EDIT);
+		GridPortlet formGrid = new GridPortlet(generateConfig());
+		formGrid.addChild(this.tableInfoPortlet, 0, 0, 1, 1);
+		formGrid.addChild(this.columnMetaDataEditForm, 0, 1, 1, 2);
+		DividerPortlet div = new DividerPortlet(generateConfig(), true, div1, formGrid);
 
-		DividerPortlet div = new DividerPortlet(generateConfig(), true, this.columnMetadata, this.columnMetaDataEditForm);
-
-		this.addChild(tableInfoPortlet, 0, 0, 1, 1);
-		//		this.addChild(columnMetadata, 0, 1, 1, 1);
-		//		this.addChild(columnMetaDataEditForm, 1, 1, 1, 1);
-		this.addChild(div, 0, 1, 1, 2);
+		this.addChild(div, 0, 0, 1, 1);
 		div.setOffsetFromTopPx(500);
 		sendAuth();
-		if (!isAdd) {
-			//initColumnMetadata(tableName);
-			this.tableInfoPortlet.addField(enableEditingCheckbox);
-			enableEditingCheckbox.setWidth(20).setHeightPx(DEFAULT_ROWHEIGHT).setLeftPosPx(DEFAULT_LEFTPOS + NAME_WIDTH + TYPE_WIDTH + DEFAULT_X_SPACING * 3 + 60)
-					.setTopPosPx(DEFAULT_TOPPOS);
-		}
 
 	}
 

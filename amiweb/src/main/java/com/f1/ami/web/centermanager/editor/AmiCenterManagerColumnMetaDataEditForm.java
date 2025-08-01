@@ -27,6 +27,7 @@ import com.f1.suite.web.portal.impl.form.FormPortletField;
 import com.f1.suite.web.portal.impl.form.FormPortletListener;
 import com.f1.suite.web.portal.impl.form.FormPortletSelectField;
 import com.f1.suite.web.portal.impl.form.FormPortletTextField;
+import com.f1.suite.web.portal.impl.form.FormPortletTitleField;
 import com.f1.suite.web.portal.style.PortletStyleManager_Dialog;
 import com.f1.utils.OH;
 import com.f1.utils.OneToOne;
@@ -103,8 +104,8 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		this.form.addMenuListener(this);
 		this.form.addFormPortletListener(this);
 		this.addChild(form);
-
-		this.columnNameEditField = new FormPortletTextField("Colummn Name" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML);
+		form.addField(new FormPortletTitleField("COLUMN:"));
+		this.columnNameEditField = new FormPortletTextField("Column Name" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML);
 		this.columnNameEditField.setName(VARNAME_COLUMN_NAME);
 		this.dataTypeEditField = new FormPortletSelectField<Byte>(Byte.class, "Data Type" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML);
 		this.dataTypeEditField.setName(VARNAME_COLUMN_DATA_TYPE);
@@ -202,9 +203,9 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		form.addButton(previewButton);
 
 		//TODO:not use hard-coded values
-		isCacheField.setLeftPosPx(164).setWidthPx(20).setHeightPx(16).setTopPosPx(220);
-		cacheValueField.setLeftPosPx(189).setWidthPx(50).setHeightPx(16).setTopPosPx(220);
-		cacheUnitField.setLeftPosPx(274).setWidthPx(140).setHeightPx(16).setTopPosPx(220);
+		isCacheField.setLeftPosPx(164).setWidthPx(20).setHeightPx(16).setTopPosPx(255);
+		cacheValueField.setLeftPosPx(189).setWidthPx(50).setHeightPx(16).setTopPosPx(255);
+		cacheUnitField.setLeftPosPx(274).setWidthPx(140).setHeightPx(16).setTopPosPx(255);
 
 		//disable all the fields on init
 		disableCache(true);
