@@ -1,4 +1,6 @@
 amione/
 *.txt
 *.class
-
+org*
+.*
+!.gitignore
