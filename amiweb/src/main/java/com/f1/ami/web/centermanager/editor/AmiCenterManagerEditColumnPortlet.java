@@ -94,7 +94,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		if (!isAdd) {
 			//initColumnMetadata(tableName);
 			this.tableInfoPortlet.addField(enableEditingCheckbox);
-			enableEditingCheckbox.setLeftPosPx(LEFTPOS + 400).setTopPosPx(TOPPOS).setWidthPx(50).setHeightPx(DEFAULT_ROWHEIGHT);
+			enableEditingCheckbox.setLeftPosPx(LEFTPOS + 400).setTopPosPx(TOPPOS).setWidthPx(20).setHeightPx(20);
 		}
 		//ROW2
 		tablePersistEngineField = tableInfoPortlet.addField(new FormPortletSelectField<String>(String.class, "PersistEngine"));
@@ -105,7 +105,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		tablePersistEngineField.setLeftPosPx(LEFTPOS).setTopPosPx(TOPPOS + 40).setWidthPx(100).setHeightPx(DEFAULT_ROWHEIGHT);
 
 		tableBroadCastField = tableInfoPortlet.addField(new FormPortletCheckboxField("Broadcast"));
-		tableBroadCastField.setLeftPosPx(LEFTPOS + 200).setTopPosPx(TOPPOS + 40).setWidthPx(50).setHeightPx(DEFAULT_ROWHEIGHT);
+		tableBroadCastField.setLeftPosPx(LEFTPOS + 200).setTopPosPx(TOPPOS + 40).setWidthPx(20).setHeightPx(20);
 
 		//ROW3
 		tableRefreshPeriodMsField = tableInfoPortlet.addField(new FormPortletTextField("RefreshPeriodMs"));

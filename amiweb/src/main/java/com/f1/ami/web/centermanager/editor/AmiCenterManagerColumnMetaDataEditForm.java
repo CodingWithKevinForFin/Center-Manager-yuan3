@@ -109,8 +109,8 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		this.form.addMenuListener(this);
 		this.form.addFormPortletListener(this);
 		this.addChild(form);
-		columnTitleField = form.addField(new FormPortletTitleField("COLUMN:"));
-		columnTitleField.setLeftPosPx(LEFTPOS);
+		columnTitleField = form.addField(new FormPortletTitleField("COLUMN"));
+		columnTitleField.setLeftPosPx(LEFTPOS).setTopPosPx(10).setWidthPx(400).setHeight(25);
 
 		this.columnNameEditField = this.form.addField(new FormPortletTextField("Column Name" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML));
 		this.columnNameEditField.setName(VARNAME_COLUMN_NAME);
@@ -140,12 +140,15 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 
 		//add storage title
 		storageTitleField = this.form.addField(new FormPortletTitleField("STORAGE"));
-		storageTitleField.setLeftPosPx(LEFTPOS).setTopPosPx(120);
+		storageTitleField.setLeftPosPx(LEFTPOS).setTopPosPx(130).setWidthPx(400).setHeight(25);
 		//common fields
+		//ROW1
 		this.noNullEditField = new FormPortletCheckboxField(AmiConsts.NONULL);
 		this.noNullEditField.setName(AmiConsts.NONULL);
+		this.noNullEditField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(160).setWidthPx(20).setHeight(20);
 		this.noBroadcastEditField = new FormPortletCheckboxField(AmiConsts.NOBROADCAST);
 		this.noBroadcastEditField.setName(AmiConsts.NOBROADCAST);
+		this.noBroadcastEditField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(160).setWidthPx(20).setHeight(20);
 		if (mode == MODE_ADD) {
 			columnNameEditField.setDisabled(false);
 			dataTypeEditField.setDisabled(false);
@@ -164,13 +167,35 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		//Data type specific fields
 		isEnumField = new FormPortletCheckboxField(AmiConsts.TYPE_NAME_ENUM);
 		isEnumField.setName(AmiConsts.TYPE_NAME_ENUM);
+		isEnumField.setLeftPosPx(LEFTPOS + 250).setTopPosPx(160).setWidthPx(20).setHeight(20);
+
+		//ROW2
+		isCompactField = new FormPortletCheckboxField(AmiConsts.COMPACT);
+		isCompactField.setName(AmiConsts.COMPACT);
+		isCompactField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(200).setWidthPx(20).setHeight(20);
+		isAsciiField = new FormPortletCheckboxField(AmiConsts.ASCII);
+		isAsciiField.setName(AmiConsts.ASCII);
+		isAsciiField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(200).setWidthPx(20).setHeight(20);
+		isBitmapField = new FormPortletCheckboxField(AmiConsts.BITMAP);
+		isBitmapField.setName(AmiConsts.BITMAP);
+		isBitmapField.setLeftPosPx(LEFTPOS + 250).setTopPosPx(200).setWidthPx(20).setHeight(20);
+
+		//ROW3
+		isOndiskField = new FormPortletCheckboxField(AmiConsts.ONDISK);
+		isOndiskField.setName(AmiConsts.ONDISK);
+		isOndiskField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(240).setWidthPx(20).setHeight(20);
+
 		isCacheField = new FormPortletCheckboxField(AmiConsts.CACHE);
 		isCacheField.setName(AmiConsts.CACHE);
 		isCacheField.setCorrelationData(AmiConsts.CACHE);
+		isCacheField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(240).setWidthPx(20).setHeight(20);
+
 		cacheValueField = new FormPortletTextField("");
 		cacheValueField.setMaxChars(100);
 		cacheValueField.setName(VARNAME_CACHE_VALUE);
 		cacheValueField.setCorrelationData(AmiConsts.CACHE);
+		cacheValueField.setLeftPosPx(LEFTPOS + 135).setTopPosPx(240).setWidthPx(50).setHeight(20);
+
 		cacheUnitField = new FormPortletSelectField<Byte>(Byte.class, "Unit");
 		cacheUnitField.setName(VARNAME_CACHE_UNIT);
 		cacheUnitField.setCorrelationData(AmiConsts.CACHE);
@@ -180,15 +205,8 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		cacheUnitField.addOption(AmiConsts.CODE_CACHE_UNIT_GB, AmiConsts.CACHE_UNIT_GB);
 		cacheUnitField.addOption(AmiConsts.CODE_CACHE_UNIT_TB, AmiConsts.CACHE_UNIT_TB);
 		cacheUnitField.setDefaultValue(AmiConsts.CODE_CACHE_UNIT_DEFAULT_BYTE);
+		cacheUnitField.setLeftPosPx(LEFTPOS + 220).setTopPosPx(240).setWidthPx(140).setHeight(20);
 
-		isCompactField = new FormPortletCheckboxField(AmiConsts.COMPACT);
-		isCompactField.setName(AmiConsts.COMPACT);
-		isAsciiField = new FormPortletCheckboxField(AmiConsts.ASCII);
-		isAsciiField.setName(AmiConsts.ASCII);
-		isBitmapField = new FormPortletCheckboxField(AmiConsts.BITMAP);
-		isBitmapField.setName(AmiConsts.BITMAP);
-		isOndiskField = new FormPortletCheckboxField(AmiConsts.ONDISK);
-		isOndiskField.setName(AmiConsts.ONDISK);
 		this.form.addField(isEnumField);
 		this.form.addField(isCompactField);
 		this.form.addField(isAsciiField);
@@ -214,9 +232,9 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		form.addButton(previewButton);
 
 		//TODO:not use hard-coded values
-		isCacheField.setLeftPosPx(164).setWidthPx(20).setHeightPx(16).setTopPosPx(255);
-		cacheValueField.setLeftPosPx(189).setWidthPx(50).setHeightPx(16).setTopPosPx(255);
-		cacheUnitField.setLeftPosPx(274).setWidthPx(140).setHeightPx(16).setTopPosPx(255);
+		//		isCacheField.setLeftPosPx(164).setWidthPx(20).setHeightPx(16).setTopPosPx(255);
+		//		cacheValueField.setLeftPosPx(189).setWidthPx(50).setHeightPx(16).setTopPosPx(255);
+		//		cacheUnitField.setLeftPosPx(274).setWidthPx(140).setHeightPx(16).setTopPosPx(255);
 
 		//disable all the fields on init
 		disableCache(true);
