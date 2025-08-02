@@ -112,13 +112,13 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		columnTitleField = form.addField(new FormPortletTitleField("COLUMN"));
 		columnTitleField.setLeftPosPx(LEFTPOS).setTopPosPx(10).setWidthPx(400).setHeight(25);
 
-		this.columnNameEditField = this.form.addField(new FormPortletTextField("Column Name" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML));
-		this.columnNameEditField.setName(VARNAME_COLUMN_NAME);
-		this.columnNameEditField.setLeftPosPx(LEFTPOS).setTopPosPx(40).setWidthPx(400).setHeight(25);
+		columnNameEditField = this.form.addField(new FormPortletTextField("Column Name" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML));
+		columnNameEditField.setName(VARNAME_COLUMN_NAME);
+		columnNameEditField.setLeftPosPx(LEFTPOS).setTopPosPx(40).setWidthPx(400).setHeight(25);
 
-		this.dataTypeEditField = this.form.addField(new FormPortletSelectField<Byte>(Byte.class, "Data Type" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML));
-		this.dataTypeEditField.setName(VARNAME_COLUMN_DATA_TYPE);
-		this.dataTypeEditField.setLeftPosPx(LEFTPOS).setTopPosPx(80).setWidthPx(400).setHeight(25);
+		dataTypeEditField = this.form.addField(new FormPortletSelectField<Byte>(Byte.class, "Data Type" + AmiCenterEntityConsts.REQUIRED_FIELD_ANNOTATION_HTML));
+		dataTypeEditField.setName(VARNAME_COLUMN_DATA_TYPE);
+		dataTypeEditField.setLeftPosPx(LEFTPOS).setTopPosPx(80).setWidthPx(400).setHeight(25);
 		dataTypeEditField.addOption(AmiDatasourceColumn.TYPE_NONE, "<NONE>");
 		dataTypeEditField.addOption(AmiDatasourceColumn.TYPE_STRING, AmiConsts.TYPE_NAME_STRING);
 		dataTypeEditField.addOption(AmiDatasourceColumn.TYPE_BINARY, AmiConsts.TYPE_NAME_BINARY);

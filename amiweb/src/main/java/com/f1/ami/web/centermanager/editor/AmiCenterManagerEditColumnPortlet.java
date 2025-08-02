@@ -122,13 +122,26 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 		tableInfoPortlet.addFormPortletListener(this);
 		//init table
-		this.columnMetadata = new FastTablePortlet(generateConfig(), new BasicTable(new Class<?>[] { String.class, String.class, String.class, Boolean.class, Integer.class },
-				new String[] { "columnName", "dataType", "options", "noNull", "position" }), "Column Configuration");
+		this.columnMetadata = new FastTablePortlet(generateConfig(),
+				new BasicTable(
+						new Class<?>[] { String.class, String.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class,
+								Boolean.class, String.class, Integer.class },
+						new String[] { "columnName", "dataType", "noNull", "nobroadcast", "enum", "compact", "ascii", "bitmap", "ondisk", "cache", "cacheValue", "position" }),
+				"Column Configuration");
 		AmiWebFormatterManager fm = service.getFormatterManager();
 		this.columnMetadata.getTable().addColumn(true, "Column Name", "columnName", fm.getBasicFormatter()).setWidth(150);
 		this.columnMetadata.getTable().addColumn(true, "Data Type", "dataType", fm.getBasicFormatter());
-		this.columnMetadata.getTable().addColumn(true, "Options", "options", fm.getBasicFormatter());
-		this.columnMetadata.getTable().addColumn(true, "NoNull", "noNull", fm.getBasicFormatter());
+		//		this.columnMetadata.getTable().addColumn(true, "Options", "options", fm.getBasicFormatter());
+		this.columnMetadata.getTable().addColumn(true, "NN", "noNull", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
+		this.columnMetadata.getTable().addColumn(true, "NB", "nobroadcast", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
+		this.columnMetadata.getTable().addColumn(true, "EM", "enum", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
+		this.columnMetadata.getTable().addColumn(true, "CM", "compact", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
+		this.columnMetadata.getTable().addColumn(true, "AS", "ascii", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
+		this.columnMetadata.getTable().addColumn(true, "BM", "bitmap", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
+		this.columnMetadata.getTable().addColumn(true, "OD", "ondisk", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
+		this.columnMetadata.getTable().addColumn(true, "CA", "cache", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
+		this.columnMetadata.getTable().addColumn(true, "Cache Value", "cacheValue", fm.getBasicFormatter()).setWidth(100);
+
 		this.columnMetadata.getTable().addColumn(true, "Position", "position", fm.getIntegerWebCellFormatter());
 		this.columnMetadata.getTable().hideColumn("position");
 		editableColumnIds.put("columnName", new TableEditableColumn("columnName", WebColumnEditConfig.EDIT_TEXTFIELD));
@@ -138,8 +151,16 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 								AmiConsts.TYPE_NAME_SHORT, AmiConsts.TYPE_NAME_DOUBLE, AmiConsts.TYPE_NAME_FLOAT, AmiConsts.TYPE_NAME_BOOLEAN, AmiConsts.TYPE_NAME_UTC,
 								AmiConsts.TYPE_NAME_UTCN, AmiConsts.TYPE_NAME_BINARY, AmiConsts.TYPE_NAME_ENUM, AmiConsts.TYPE_NAME_CHAR, AmiConsts.TYPE_NAME_BIGINT,
 								AmiConsts.TYPE_NAME_BIGDEC, AmiConsts.TYPE_NAME_COMPLEX, AmiConsts.TYPE_NAME_UUID })));
-		editableColumnIds.put("options", new TableEditableColumn("options", WebColumnEditConfig.EDIT_TEXTFIELD));
+		//editableColumnIds.put("options", new TableEditableColumn("options", WebColumnEditConfig.EDIT_TEXTFIELD));
 		editableColumnIds.put("noNull", new TableEditableColumn("noNull", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("nobroadcast", new TableEditableColumn("nobroadcast", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("enum", new TableEditableColumn("enum", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("compact", new TableEditableColumn("compact", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("ascii", new TableEditableColumn("ascii", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("bitmap", new TableEditableColumn("bitmap", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("ondisk", new TableEditableColumn("ondisk", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("cache", new TableEditableColumn("cache", WebColumnEditConfig.EDIT_CHECKBOX));
+
 		this.columnMetadata.getTable().sortRows("position", true, true, false);
 		this.columnMetadata.setDialogStyle(AmiWebUtils.getService(getManager()).getUserDialogStyleManager());
 		this.columnMetadata.addOption(FastTablePortlet.OPTION_TITLE_BAR_COLOR, "#6f6f6f");
@@ -229,9 +250,19 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 				String columnName = (String) r.get("ColumnName");
 				String dataType = (String) r.get("DataType");
 				String options = SH.noNull((String) r.get("Options"));//null is considered empty string
+				Map<String, String> storageOptions = parseOptions(options);
+				Boolean noBroadcast = storageOptions.containsKey("NoBroadcast");
+				//TODO: enum should go itto the options as well
+				Boolean enm = storageOptions.containsKey("Enum");
+				Boolean compact = storageOptions.containsKey("Compact");
+				Boolean ascii = storageOptions.containsKey("Ascii");
+				Boolean bitmap = storageOptions.containsKey("BITMAP");
+				Boolean ondisk = storageOptions.containsKey("OnDisk");
+				Boolean cache = storageOptions.containsKey("Cache");
+				String cacheVal = storageOptions.get("Cache");
 				Boolean noNull = (Boolean) r.get("NoNull");
 				Integer position = (Integer) r.get("Position");
-				this.columnMetadata.addRow(columnName, dataType, options, noNull, position);
+				this.columnMetadata.addRow(columnName, dataType, noNull, noBroadcast, enm, compact, ascii, bitmap, ondisk, cache, cacheVal, position);
 			}
 		}
 
