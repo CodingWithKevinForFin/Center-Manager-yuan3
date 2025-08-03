@@ -7,12 +7,9 @@ import java.util.Map.Entry;
 
 import com.f1.ami.amicommon.AmiConsts;
 import com.f1.ami.amicommon.msg.AmiDatasourceColumn;
-import com.f1.ami.web.AmiWebLayoutHelper;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.AmiWebUtils;
 import com.f1.ami.web.centermanager.AmiCenterEntityConsts;
-import com.f1.ami.web.centermanager.AmiCenterManagerUtils;
-import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode;
 import com.f1.suite.web.menu.WebMenu;
 import com.f1.suite.web.portal.PortletConfig;
 import com.f1.suite.web.portal.PortletManager;
@@ -32,7 +29,6 @@ import com.f1.suite.web.portal.style.PortletStyleManager_Dialog;
 import com.f1.utils.OH;
 import com.f1.utils.OneToOne;
 import com.f1.utils.SH;
-import com.f1.utils.casters.Caster_Boolean;
 import com.f1.utils.casters.Caster_String;
 import com.f1.utils.concurrent.IdentityHashSet;
 import com.f1.utils.structs.Tuple2;
@@ -85,11 +81,6 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 	private String tableName;
 	private byte mode = MODE_EDIT;
 
-	final private FormPortletButton submitButton;
-	final private FormPortletButton resetButton;
-	final private FormPortletButton diffButton;
-	final private FormPortletButton previewButton;
-
 	final private IdentityHashSet<FormPortletTextField> editedFields = new IdentityHashSet<FormPortletTextField>();
 	final private IdentityHashSet<FormPortletCheckboxField> editedCheckboxFields = new IdentityHashSet<FormPortletCheckboxField>();
 	final private IdentityHashSet<FormPortletSelectField> editedSelectFields = new IdentityHashSet<FormPortletSelectField>();
@@ -139,16 +130,17 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		dataTypeEditField.setDefaultValue(AmiDatasourceColumn.TYPE_NONE);
 
 		//add storage title
+		int offset = 35;
 		storageTitleField = this.form.addField(new FormPortletTitleField("STORAGE"));
-		storageTitleField.setLeftPosPx(LEFTPOS).setTopPosPx(130).setWidthPx(400).setHeight(25);
+		storageTitleField.setLeftPosPx(LEFTPOS).setTopPosPx(130 + offset - 10).setWidthPx(400).setHeight(25);
 		//common fields
 		//ROW1
 		this.noNullEditField = new FormPortletCheckboxField(AmiConsts.NONULL);
 		this.noNullEditField.setName(AmiConsts.NONULL);
-		this.noNullEditField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(160).setWidthPx(20).setHeight(20);
+		this.noNullEditField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
 		this.noBroadcastEditField = new FormPortletCheckboxField(AmiConsts.NOBROADCAST);
 		this.noBroadcastEditField.setName(AmiConsts.NOBROADCAST);
-		this.noBroadcastEditField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(160).setWidthPx(20).setHeight(20);
+		this.noBroadcastEditField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
 		if (mode == MODE_ADD) {
 			columnNameEditField.setDisabled(false);
 			dataTypeEditField.setDisabled(false);
@@ -167,34 +159,34 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		//Data type specific fields
 		isEnumField = new FormPortletCheckboxField(AmiConsts.TYPE_NAME_ENUM);
 		isEnumField.setName(AmiConsts.TYPE_NAME_ENUM);
-		isEnumField.setLeftPosPx(LEFTPOS + 250).setTopPosPx(160).setWidthPx(20).setHeight(20);
+		isEnumField.setLeftPosPx(LEFTPOS + 250).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
 
 		//ROW2
 		isCompactField = new FormPortletCheckboxField(AmiConsts.COMPACT);
 		isCompactField.setName(AmiConsts.COMPACT);
-		isCompactField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(200).setWidthPx(20).setHeight(20);
+		isCompactField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(200 + offset).setWidthPx(20).setHeight(20);
 		isAsciiField = new FormPortletCheckboxField(AmiConsts.ASCII);
 		isAsciiField.setName(AmiConsts.ASCII);
-		isAsciiField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(200).setWidthPx(20).setHeight(20);
+		isAsciiField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(200 + offset).setWidthPx(20).setHeight(20);
 		isBitmapField = new FormPortletCheckboxField(AmiConsts.BITMAP);
 		isBitmapField.setName(AmiConsts.BITMAP);
-		isBitmapField.setLeftPosPx(LEFTPOS + 250).setTopPosPx(200).setWidthPx(20).setHeight(20);
+		isBitmapField.setLeftPosPx(LEFTPOS + 250).setTopPosPx(200 + offset).setWidthPx(20).setHeight(20);
 
 		//ROW3
 		isOndiskField = new FormPortletCheckboxField(AmiConsts.ONDISK);
 		isOndiskField.setName(AmiConsts.ONDISK);
-		isOndiskField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(240).setWidthPx(20).setHeight(20);
+		isOndiskField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(240 + offset).setWidthPx(20).setHeight(20);
 
 		isCacheField = new FormPortletCheckboxField(AmiConsts.CACHE);
 		isCacheField.setName(AmiConsts.CACHE);
 		isCacheField.setCorrelationData(AmiConsts.CACHE);
-		isCacheField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(240).setWidthPx(20).setHeight(20);
+		isCacheField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(240 + offset).setWidthPx(20).setHeight(20);
 
 		cacheValueField = new FormPortletTextField("");
 		cacheValueField.setMaxChars(100);
 		cacheValueField.setName(VARNAME_CACHE_VALUE);
 		cacheValueField.setCorrelationData(AmiConsts.CACHE);
-		cacheValueField.setLeftPosPx(LEFTPOS + 135).setTopPosPx(240).setWidthPx(50).setHeight(20);
+		cacheValueField.setLeftPosPx(LEFTPOS + 135).setTopPosPx(240 + offset).setWidthPx(50).setHeight(20);
 
 		cacheUnitField = new FormPortletSelectField<Byte>(Byte.class, "Unit");
 		cacheUnitField.setName(VARNAME_CACHE_UNIT);
@@ -205,7 +197,7 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		cacheUnitField.addOption(AmiConsts.CODE_CACHE_UNIT_GB, AmiConsts.CACHE_UNIT_GB);
 		cacheUnitField.addOption(AmiConsts.CODE_CACHE_UNIT_TB, AmiConsts.CACHE_UNIT_TB);
 		cacheUnitField.setDefaultValue(AmiConsts.CODE_CACHE_UNIT_DEFAULT_BYTE);
-		cacheUnitField.setLeftPosPx(LEFTPOS + 220).setTopPosPx(240).setWidthPx(140).setHeight(20);
+		cacheUnitField.setLeftPosPx(LEFTPOS + 220).setTopPosPx(240 + offset).setWidthPx(140).setHeight(20);
 
 		this.form.addField(isEnumField);
 		this.form.addField(isCompactField);
@@ -215,21 +207,6 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		this.form.addField(isCacheField);
 		this.form.addField(cacheValueField);
 		this.form.addField(cacheUnitField);
-
-		//buttons
-		this.submitButton = new FormPortletButton("Test");
-		this.resetButton = new FormPortletButton("Reset");
-		this.diffButton = new FormPortletButton("Diff");
-		this.previewButton = new FormPortletButton("Preview");
-		this.submitButton.setEnabled(false);
-		this.resetButton.setEnabled(false);
-		this.diffButton.setEnabled(false);
-		this.previewButton.setEnabled(false);
-
-		form.addButton(submitButton);
-		form.addButton(resetButton);
-		form.addButton(diffButton);
-		form.addButton(previewButton);
 
 		//TODO:not use hard-coded values
 		//		isCacheField.setLeftPosPx(164).setWidthPx(20).setHeightPx(16).setTopPosPx(255);
@@ -340,132 +317,132 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 
 	@Override
 	public void onButtonPressed(FormPortlet portlet, FormPortletButton button) {
-		if (this.resetButton == button) {
-			IdentityHashSet<FormPortletField> allEditedFields = new IdentityHashSet<FormPortletField>();
-			for (FormPortletField ff : this.editedFields)
-				allEditedFields.add(ff);
-			for (FormPortletField ff : this.editedSelectFields)
-				allEditedFields.add(ff);
-			for (FormPortletField ff : this.editedCheckboxFields)
-				allEditedFields.add(ff);
-
-			//loop over the edited fields and revert each of them
-			for (FormPortletField f : allEditedFields) {
-				boolean hasCacheChanged = false;
-				if (f == this.cacheUnitField || f == this.cacheValueField || f == this.isCacheField)
-					hasCacheChanged = true;
-				String orig = null;
-				if (hasCacheChanged) {
-					String origCache = columnCache.get(AmiConsts.CACHE);
-					//extract out the orignal cache component(whether it is unit or value or the flag
-					if (f == this.cacheUnitField)
-						orig = AmiCenterManagerEditColumnPortlet.parseCacheValue(origCache).getB();
-					else if (f == this.isCacheField)
-						orig = origCache == null ? "false" : "true";
-					else if (f == this.cacheValueField)
-						orig = SH.toString(AmiCenterManagerEditColumnPortlet.parseCacheValue(origCache).getA());
-				} else
-					orig = columnCache.get(f.getName());
-				if (orig == null) {//the field is not configured prior to edit
-					if (f instanceof FormPortletCheckboxField)
-						f.setValue(false);
-					else if (f instanceof FormPortletTextField)
-						f.setValue("");//revert to empty string
-					else if (f instanceof FormPortletSelectField) {
-						if (VARNAME_CACHE_UNIT.equals(f.getName()))
-							f.setValue(AmiConsts.CODE_CACHE_UNIT_DEFAULT_BYTE);
-					}
-					onFieldChanged(f);
-				}
-				if (f instanceof FormPortletSelectField) {
-					FormPortletSelectField<Byte> sf = (FormPortletSelectField) f;
-
-					if (VARNAME_CACHE_UNIT.equals(sf.getName())) {
-						short origTypeCode = AmiCenterManagerUtils.centerObjectTypeToCode(AmiCenterGraphNode.TYPE_TRIGGER, orig);
-						if (SH.isnt(orig))
-							orig = AmiConsts.CACHE_UNIT_DEFAULT_BYTE;
-						sf.setValue(AmiCenterManagerUtils.toCacheUnitCode(orig));
-						onFieldChanged(f);
-					} else if (VARNAME_COLUMN_DATA_TYPE.equals(sf.getName())) {
-						if (orig == null)
-							orig = "<NONE>";
-						sf.setValue(AmiCenterManagerUtils.toDataTypeCode(orig));
-						onFieldChanged(f);
-					}
-				} else if (f instanceof FormPortletTextField) {
-					FormPortletTextField tf = (FormPortletTextField) f;
-					tf.setValue(orig);
-					onFieldChanged(f);
-				} else if (f instanceof FormPortletCheckboxField) {
-					FormPortletCheckboxField cf = (FormPortletCheckboxField) f;
-					if (orig == null)
-						orig = "false";
-					cf.setValue(Caster_Boolean.INSTANCE.cast(orig));
-					onFieldChanged(f);
-				}
-			}
-		} else if (this.submitButton == button) {
-			//check datatype field and name field
-			if (SH.isnt(this.columnNameEditField) || this.dataTypeEditField.getValue() == AmiDatasourceColumn.TYPE_NONE) {
-				throwAlertDialogue("Column Name or Data type cannot be empty", "Warning");
-				return;
-			}
-			String query = null;
-			switch (this.mode) {
-				case MODE_EDIT:
-					//if only the name has changed
-					if (this.editedFields.size() == 1 && this.editedFields.contains(this.columnNameEditField) && this.editedSelectFields.isEmpty()) {
-						query = "ALTER TABLE " + this.tableName + " RENAME " + this.columnCache.get(VARNAME_COLUMN_NAME) + " TO " + this.columnNameEditField.getValue();
-						getManager().showDialog("Submit Edit Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
-								AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
-					} else {
-						query = "ALTER TABLE " + this.tableName + " MODIFY " + this.columnCache.get(VARNAME_COLUMN_NAME) + " AS " + previewScript();
-						getManager().showDialog("Submit Edit Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
-								AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
-					}
-					break;
-				case MODE_ADD:
-					switch (this.actionMode) {
-						case ACTION_ADD_AFTER:
-							query = "ALTER TABLE " + this.tableName + " ADD " + previewScript() + " AFTER " + this.targetColumnName;
-							break;
-						case ACTION_ADD_BEFORE:
-							query = "ALTER TABLE " + this.tableName + " ADD " + previewScript() + " BEFORE " + this.targetColumnName;
-							break;
-						case ACTION_DROP://won't reach here, for drop column, no need to spin up a edit form
-							query = "ALTER TABLE " + this.tableName + " DROP " + this.targetColumnName;
-							break;
-
-					}
-					getManager().showDialog("Submit Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
-							AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
-					break;
-				default:
-					throw new NullPointerException("Unknow mode: " + this.mode);
-			}
-
-		} else if (this.previewButton == button) {
-			String text = AmiCenterManagerUtils.formatPreviewScript(previewScript());
-			PortletStyleManager_Dialog dp = service.getPortletManager().getStyleManager().getDialogStyle();
-			final PortletManager portletManager = service.getPortletManager();
-			ConfirmDialogPortlet cdp = new ConfirmDialogPortlet(portletManager.generateConfig(), text, ConfirmDialogPortlet.TYPE_MESSAGE);
-			int w = dp.getDialogWidth();
-			int h = dp.getDialogHeight();
-			portletManager.showDialog("Trigger Script", cdp, w + 200, h);
-		} else if (this.diffButton == button) {
-			Tuple2<Map<String, Object>, Map<String, Object>> diffs = getJsonDiff();
-			LinkedHashMap a = new LinkedHashMap<String, Map>();
-			a.put("Configuration", diffs.getA());
-			LinkedHashMap b = new LinkedHashMap<String, Map>();
-			b.put("Configuration", diffs.getB());
-			//add command format
-			a.put("Command", this.getOrigColumnCmd());
-			b.put("Command", this.previewScript());
-
-			String oldConfig = AmiWebLayoutHelper.toJson(a, service);
-			String newConfig = AmiWebLayoutHelper.toJson(b, service);
-			AmiWebUtils.diffConfigurations(service, oldConfig, newConfig, "Orginal Script", "New Script", null);
-		}
+		//		if (this.resetButton == button) {
+		//			IdentityHashSet<FormPortletField> allEditedFields = new IdentityHashSet<FormPortletField>();
+		//			for (FormPortletField ff : this.editedFields)
+		//				allEditedFields.add(ff);
+		//			for (FormPortletField ff : this.editedSelectFields)
+		//				allEditedFields.add(ff);
+		//			for (FormPortletField ff : this.editedCheckboxFields)
+		//				allEditedFields.add(ff);
+		//
+		//			//loop over the edited fields and revert each of them
+		//			for (FormPortletField f : allEditedFields) {
+		//				boolean hasCacheChanged = false;
+		//				if (f == this.cacheUnitField || f == this.cacheValueField || f == this.isCacheField)
+		//					hasCacheChanged = true;
+		//				String orig = null;
+		//				if (hasCacheChanged) {
+		//					String origCache = columnCache.get(AmiConsts.CACHE);
+		//					//extract out the orignal cache component(whether it is unit or value or the flag
+		//					if (f == this.cacheUnitField)
+		//						orig = AmiCenterManagerEditColumnPortlet.parseCacheValue(origCache).getB();
+		//					else if (f == this.isCacheField)
+		//						orig = origCache == null ? "false" : "true";
+		//					else if (f == this.cacheValueField)
+		//						orig = SH.toString(AmiCenterManagerEditColumnPortlet.parseCacheValue(origCache).getA());
+		//				} else
+		//					orig = columnCache.get(f.getName());
+		//				if (orig == null) {//the field is not configured prior to edit
+		//					if (f instanceof FormPortletCheckboxField)
+		//						f.setValue(false);
+		//					else if (f instanceof FormPortletTextField)
+		//						f.setValue("");//revert to empty string
+		//					else if (f instanceof FormPortletSelectField) {
+		//						if (VARNAME_CACHE_UNIT.equals(f.getName()))
+		//							f.setValue(AmiConsts.CODE_CACHE_UNIT_DEFAULT_BYTE);
+		//					}
+		//					onFieldChanged(f);
+		//				}
+		//				if (f instanceof FormPortletSelectField) {
+		//					FormPortletSelectField<Byte> sf = (FormPortletSelectField) f;
+		//
+		//					if (VARNAME_CACHE_UNIT.equals(sf.getName())) {
+		//						short origTypeCode = AmiCenterManagerUtils.centerObjectTypeToCode(AmiCenterGraphNode.TYPE_TRIGGER, orig);
+		//						if (SH.isnt(orig))
+		//							orig = AmiConsts.CACHE_UNIT_DEFAULT_BYTE;
+		//						sf.setValue(AmiCenterManagerUtils.toCacheUnitCode(orig));
+		//						onFieldChanged(f);
+		//					} else if (VARNAME_COLUMN_DATA_TYPE.equals(sf.getName())) {
+		//						if (orig == null)
+		//							orig = "<NONE>";
+		//						sf.setValue(AmiCenterManagerUtils.toDataTypeCode(orig));
+		//						onFieldChanged(f);
+		//					}
+		//				} else if (f instanceof FormPortletTextField) {
+		//					FormPortletTextField tf = (FormPortletTextField) f;
+		//					tf.setValue(orig);
+		//					onFieldChanged(f);
+		//				} else if (f instanceof FormPortletCheckboxField) {
+		//					FormPortletCheckboxField cf = (FormPortletCheckboxField) f;
+		//					if (orig == null)
+		//						orig = "false";
+		//					cf.setValue(Caster_Boolean.INSTANCE.cast(orig));
+		//					onFieldChanged(f);
+		//				}
+		//			}
+		//		} else if (this.submitButton == button) {
+		//			//check datatype field and name field
+		//			if (SH.isnt(this.columnNameEditField) || this.dataTypeEditField.getValue() == AmiDatasourceColumn.TYPE_NONE) {
+		//				throwAlertDialogue("Column Name or Data type cannot be empty", "Warning");
+		//				return;
+		//			}
+		//			String query = null;
+		//			switch (this.mode) {
+		//				case MODE_EDIT:
+		//					//if only the name has changed
+		//					if (this.editedFields.size() == 1 && this.editedFields.contains(this.columnNameEditField) && this.editedSelectFields.isEmpty()) {
+		//						query = "ALTER TABLE " + this.tableName + " RENAME " + this.columnCache.get(VARNAME_COLUMN_NAME) + " TO " + this.columnNameEditField.getValue();
+		//						getManager().showDialog("Submit Edit Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
+		//								AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
+		//					} else {
+		//						query = "ALTER TABLE " + this.tableName + " MODIFY " + this.columnCache.get(VARNAME_COLUMN_NAME) + " AS " + previewScript();
+		//						getManager().showDialog("Submit Edit Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
+		//								AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
+		//					}
+		//					break;
+		//				case MODE_ADD:
+		//					switch (this.actionMode) {
+		//						case ACTION_ADD_AFTER:
+		//							query = "ALTER TABLE " + this.tableName + " ADD " + previewScript() + " AFTER " + this.targetColumnName;
+		//							break;
+		//						case ACTION_ADD_BEFORE:
+		//							query = "ALTER TABLE " + this.tableName + " ADD " + previewScript() + " BEFORE " + this.targetColumnName;
+		//							break;
+		//						case ACTION_DROP://won't reach here, for drop column, no need to spin up a edit form
+		//							query = "ALTER TABLE " + this.tableName + " DROP " + this.targetColumnName;
+		//							break;
+		//
+		//					}
+		//					getManager().showDialog("Submit Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
+		//							AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
+		//					break;
+		//				default:
+		//					throw new NullPointerException("Unknow mode: " + this.mode);
+		//			}
+		//
+		//		} else if (this.previewButton == button) {
+		//			String text = AmiCenterManagerUtils.formatPreviewScript(previewScript());
+		//			PortletStyleManager_Dialog dp = service.getPortletManager().getStyleManager().getDialogStyle();
+		//			final PortletManager portletManager = service.getPortletManager();
+		//			ConfirmDialogPortlet cdp = new ConfirmDialogPortlet(portletManager.generateConfig(), text, ConfirmDialogPortlet.TYPE_MESSAGE);
+		//			int w = dp.getDialogWidth();
+		//			int h = dp.getDialogHeight();
+		//			portletManager.showDialog("Trigger Script", cdp, w + 200, h);
+		//		} else if (this.diffButton == button) {
+		//			Tuple2<Map<String, Object>, Map<String, Object>> diffs = getJsonDiff();
+		//			LinkedHashMap a = new LinkedHashMap<String, Map>();
+		//			a.put("Configuration", diffs.getA());
+		//			LinkedHashMap b = new LinkedHashMap<String, Map>();
+		//			b.put("Configuration", diffs.getB());
+		//			//add command format
+		//			a.put("Command", this.getOrigColumnCmd());
+		//			b.put("Command", this.previewScript());
+		//
+		//			String oldConfig = AmiWebLayoutHelper.toJson(a, service);
+		//			String newConfig = AmiWebLayoutHelper.toJson(b, service);
+		//			AmiWebUtils.diffConfigurations(service, oldConfig, newConfig, "Orginal Script", "New Script", null);
+		//		}
 	}
 
 	public String getOrigColumnCmd() {
@@ -670,10 +647,10 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		}
 		boolean hasNoChanges = this.editedFields.isEmpty() && this.editedSelectFields.isEmpty() && this.editedCheckboxFields.isEmpty();
 		if (hasNoChanges != hadNoChanges) {
-			this.submitButton.setEnabled(!hasNoChanges);
-			this.resetButton.setEnabled(!hasNoChanges);
-			this.diffButton.setEnabled(!hasNoChanges);
-			this.previewButton.setEnabled(!hasNoChanges);
+			//			this.submitButton.setEnabled(!hasNoChanges);
+			//			this.resetButton.setEnabled(!hasNoChanges);
+			//			this.diffButton.setEnabled(!hasNoChanges);
+			//			this.previewButton.setEnabled(!hasNoChanges);
 		}
 	}
 

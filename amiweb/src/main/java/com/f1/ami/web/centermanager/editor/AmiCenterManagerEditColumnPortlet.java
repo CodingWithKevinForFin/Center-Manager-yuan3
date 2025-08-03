@@ -122,16 +122,18 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 		tableInfoPortlet.addFormPortletListener(this);
 		//init table
-		this.columnMetadata = new FastTablePortlet(generateConfig(),
-				new BasicTable(
-						new Class<?>[] { String.class, String.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class,
-								Boolean.class, String.class, Integer.class },
-						new String[] { "columnName", "dataType", "noNull", "nobroadcast", "enum", "compact", "ascii", "bitmap", "ondisk", "cache", "cacheValue", "position" }),
+		this.columnMetadata = new FastTablePortlet(generateConfig(), new BasicTable(
+				new Class<?>[] { String.class, String.class, String.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class, Boolean.class,
+						Boolean.class, String.class, Integer.class },
+				new String[] { "columnName", "dataType", "options", "noNull", "nobroadcast", "enum", "compact", "ascii", "bitmap", "ondisk", "cache", "cacheValue", "position" }),
 				"Column Configuration");
 		AmiWebFormatterManager fm = service.getFormatterManager();
 		this.columnMetadata.getTable().addColumn(true, "Column Name", "columnName", fm.getBasicFormatter()).setWidth(150);
 		this.columnMetadata.getTable().addColumn(true, "Data Type", "dataType", fm.getBasicFormatter());
-		//		this.columnMetadata.getTable().addColumn(true, "Options", "options", fm.getBasicFormatter());
+
+		this.columnMetadata.getTable().addColumn(true, "Options", "options", fm.getBasicFormatter());
+		this.columnMetadata.getTable().hideColumn("options");
+
 		this.columnMetadata.getTable().addColumn(true, "NN", "noNull", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
 		this.columnMetadata.getTable().addColumn(true, "NB", "nobroadcast", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
 		this.columnMetadata.getTable().addColumn(true, "EM", "enum", fm.getCheckboxWebCellFormatter()).setWidth(30).setJsFormatterType("checkbox");
@@ -186,6 +188,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		DividerPortlet div = new DividerPortlet(generateConfig(), true, div1, formGrid);
 
 		this.addChild(div, 0, 0, 1, 1);
+		this.addChild(buttonsFp, 0, 1);
+		setRowSize(1, 40);
 		div.setOffsetFromTopPx(500);
 		sendAuth();
 
@@ -262,7 +266,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 				String cacheVal = storageOptions.get("Cache");
 				Boolean noNull = (Boolean) r.get("NoNull");
 				Integer position = (Integer) r.get("Position");
-				this.columnMetadata.addRow(columnName, dataType, noNull, noBroadcast, enm, compact, ascii, bitmap, ondisk, cache, cacheVal, position);
+				this.columnMetadata.addRow(columnName, dataType, options, noNull, noBroadcast, enm, compact, ascii, bitmap, ondisk, cache, cacheVal, position);
 			}
 		}
 
@@ -322,23 +326,29 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void onCellMousedown(WebTable table, Row row, WebColumn col) {
-		if (row.containsValue(null))
-			return;
 		this.columnMetaDataEditForm.resetForm();
 		String dataType = (String) row.get("dataType");
 		String columnName = (String) row.get("columnName");
-		Boolean noNull = (Boolean) row.get("noNull");
-		Integer position = (Integer) row.get("position");
 		String options = (String) row.get("options");
+		Boolean noNull = (Boolean) row.get("noNull");
+		Boolean nobroadcast = (Boolean) row.get("nobroadcast");
+		Boolean enm = (Boolean) row.get("enum");
+		Boolean compact = (Boolean) row.get("compact");
+		Boolean ascii = (Boolean) row.get("ascii");
+		Boolean bitmap = (Boolean) row.get("bitmap");
+		Boolean ondisk = (Boolean) row.get("ondisk");
+		Boolean cache = (Boolean) row.get("cache");
+		String cacheVal = (String) row.get("cacheValue");
+		Integer position = (Integer) row.get("position");
 		FormPortletTextField f1 = (FormPortletTextField) this.columnMetaDataEditForm.getForm().getFieldByName("columnName");
 		f1.setValue(columnName);
-		f1.setDisabled(false);
+
 		FormPortletSelectField f2 = (FormPortletSelectField) this.columnMetaDataEditForm.getForm().getFieldByName(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_DATA_TYPE);
 		f2.setValue(AmiUtils.parseTypeName(dataType));
-		f2.setDisabled(false);
+
 		FormPortletCheckboxField f3 = (FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName(AmiConsts.NONULL);
 		f3.setValue(noNull);
-		f3.setDisabled(false);
+
 		Map<String, String> m = parseOptions(options);
 
 		//set the column cache
@@ -508,20 +518,63 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public String prepareUseClause() {
-		// TODO Auto-generated method stub
-		return null;
+		StringBuilder sb = new StringBuilder();
+		String persisengine = tablePersistEngineField.getValue();
+		if (!AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE.equals(persisengine))
+			sb.append("PersistEngine = ").append(persisengine).append(' ');
+		if (!tableBroadCastField.getBooleanValue())
+			sb.append("NoBroadcast");
+		sb.append(" RefreshPeriodMs = ").append(SH.doubleQuote(tableRefreshPeriodMsField.getValue()));
+		sb.append(" OnUndefColumn = ").append(SH.doubleQuote(tableOnUndefColumnField.getValue()));
+		sb.append(" InitialCapacity = ").append(SH.doubleQuote(tableInitialCapacityField.getValue())).append(';');
+		return sb.toString();
 	}
 
 	@Override
 	public String preparePreUseClause() {
-		// TODO Auto-generated method stub
-		return null;
+		StringBuilder sb = new StringBuilder();
+		sb.append("CREATE PUBLIC TABLE ").append(tableNameField.getValue()).append('(');
+		//schema
+		Table t = this.columnMetadata.getTable().getTable();
+		for (Row row : t.getRows()) {
+			String dataType = (String) row.get("dataType");
+			String columnName = (String) row.get("columnName");
+			sb.append(columnName).append(" ").append(dataType);
+
+			Boolean noNull = (Boolean) row.get("noNull");
+			if (noNull)
+				sb.append(' ').append("NoNull");
+			Boolean nobroadcast = (Boolean) row.get("nobroadcast");
+			if (nobroadcast)
+				sb.append(' ').append("NoBroadcast");
+			//TODO:what do we do with enum?
+			Boolean enm = (Boolean) row.get("enum");
+			Boolean compact = (Boolean) row.get("compact");
+			if (compact)
+				sb.append(' ').append("Compact");
+			Boolean ascii = (Boolean) row.get("ascii");
+			if (ascii)
+				sb.append(' ').append("Ascii");
+			Boolean bitmap = (Boolean) row.get("bitmap");
+			if (bitmap)
+				sb.append(' ').append("BITMAP");
+			Boolean ondisk = (Boolean) row.get("ondisk");
+			if (ondisk)
+				sb.append(' ').append("OnDisk");
+			Boolean cache = (Boolean) row.get("cache");
+			if (cache)
+				sb.append(' ').append("Cache = ");
+			String cacheVal = (String) row.get("cacheValue");
+			if (SH.is(cacheVal))
+				sb.append(' ').append(cacheVal);
+			sb.append(',');
+		}
+		return sb.toString();
 	}
 
 	@Override
 	public String exportToText() {
-		// TODO Auto-generated method stub
-		return null;
+		return previewScript();
 	}
 
 	@Override
@@ -529,6 +582,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		CreateTableNode cn = AmiCenterManagerUtils.scriptToCreateTableNode(text);
 		Map<String, String> tableConfig = AmiCenterManagerUtils.parseAdminNode_Table(cn);
 		String tableName = tableConfig.get("name");
+		tableNameField.setDefaultValue(tableName);
+		tableNameField.setValue(tableName);
 		initColumnMetadata(tableName);
 		for (Entry<String, String> e : tableConfig.entrySet()) {
 			String key = e.getKey();
