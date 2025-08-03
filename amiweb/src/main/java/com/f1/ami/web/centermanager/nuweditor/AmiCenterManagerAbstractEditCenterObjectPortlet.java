@@ -12,6 +12,7 @@ import com.f1.ami.web.centermanager.AmiCenterEntityConsts;
 import com.f1.ami.web.centermanager.AmiCenterManagerUtils;
 import com.f1.ami.web.centermanager.editor.AmiCenterManagerSubmitEditScriptPortlet;
 import com.f1.ami.web.centermanager.graph.nodes.AmiCenterGraphNode;
+import com.f1.ami.web.centermanager.portlets.AmiCenterManagerReviewApplyScriptPortlet;
 import com.f1.base.Action;
 import com.f1.container.ResultMessage;
 import com.f1.suite.web.portal.PortletConfig;
@@ -68,7 +69,7 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 	protected final FormPortletButton applyButton;
 	protected final FormPortletButton cancelButton;
 	protected final FormPortletButton resetButton;
-	//private final FormPortletButton previewButton;
+
 	protected final FormPortletButton diffButton;
 	protected final FormPortletButton importExportButton;
 	protected final static ObjectToJsonConverter JSON_CONVERTER = new ObjectToJsonConverter();
@@ -104,7 +105,7 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 		this.buttonsFp.addMenuListener(this);
 		this.buttonsFp.addFormPortletListener(this);
 
-		this.applyButton = buttonsFp.addButton(new FormPortletButton("Submit"));
+		this.applyButton = buttonsFp.addButton(new FormPortletButton("Apply"));
 		this.cancelButton = buttonsFp.addButton(new FormPortletButton("Cancel"));
 		this.diffButton = buttonsFp.addButton(new FormPortletButton("Diff"));
 		if (!isAdd)
@@ -122,10 +123,11 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 			return;
 		} else if (button == this.importExportButton) {
 			getManager().showDialog("Export/Import Editor Script", new AmiCenterManagerScriptExportPortlet(generateConfig(), this));
-		} else if (button == this.applyButton) {
-			//getManager().showDialog("Export/Import Editor Script", new AmiCenterManagerTriggerEditor_SelectEditor(generateConfig()), 800, 750);
 		} else if (button == this.resetButton) {
 			revertEdit();
+		} else if (button == this.applyButton) {
+			getManager().showDialog("Apply SQL", new AmiCenterManagerReviewApplyScriptPortlet(generateConfig()), 1000, 750);
+
 		}
 	}
 
