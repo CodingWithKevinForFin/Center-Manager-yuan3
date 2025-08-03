@@ -163,6 +163,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		editableColumnIds.put("bitmap", new TableEditableColumn("bitmap", WebColumnEditConfig.EDIT_CHECKBOX));
 		editableColumnIds.put("ondisk", new TableEditableColumn("ondisk", WebColumnEditConfig.EDIT_CHECKBOX));
 		editableColumnIds.put("cache", new TableEditableColumn("cache", WebColumnEditConfig.EDIT_CHECKBOX));
+		editableColumnIds.put("cacheValue", new TableEditableColumn("cacheValue", WebColumnEditConfig.EDIT_TEXTFIELD));
 
 		this.columnMetadata.getTable().sortRows("position", true, true, false);
 		this.columnMetadata.setDialogStyle(AmiWebUtils.getService(getManager()).getUserDialogStyleManager());
