@@ -646,7 +646,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			getManager().showAlert(errorSink.toString());
 			return;
 		}
-		//need to calculate new position for the added row
+		//TODO:need to calculate new position for the added row
 
 		if (editedTable.getSize() == 0) {
 			this.columnMetadata.finishEdit();

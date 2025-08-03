@@ -65,7 +65,7 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 	//buttons
 	final protected FormPortlet buttonsFp;
 	protected AmiCenterGraphNode correlationNode;
-	protected final FormPortletButton submitButton;
+	protected final FormPortletButton applyButton;
 	protected final FormPortletButton cancelButton;
 	protected final FormPortletButton resetButton;
 	//private final FormPortletButton previewButton;
@@ -104,7 +104,7 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 		this.buttonsFp.addMenuListener(this);
 		this.buttonsFp.addFormPortletListener(this);
 
-		this.submitButton = buttonsFp.addButton(new FormPortletButton("Submit"));
+		this.applyButton = buttonsFp.addButton(new FormPortletButton("Submit"));
 		this.cancelButton = buttonsFp.addButton(new FormPortletButton("Cancel"));
 		this.diffButton = buttonsFp.addButton(new FormPortletButton("Diff"));
 		if (!isAdd)
@@ -122,7 +122,7 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 			return;
 		} else if (button == this.importExportButton) {
 			getManager().showDialog("Export/Import Editor Script", new AmiCenterManagerScriptExportPortlet(generateConfig(), this));
-		} else if (button == this.submitButton) {
+		} else if (button == this.applyButton) {
 			//getManager().showDialog("Export/Import Editor Script", new AmiCenterManagerTriggerEditor_SelectEditor(generateConfig()), 800, 750);
 		} else if (button == this.resetButton) {
 			revertEdit();
@@ -156,7 +156,7 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 		}
 		boolean hasNoChanges = this.editedFields.isEmpty();
 		if (hasNoChanges != hadNoChanges) {
-			this.submitButton.setEnabled(!hasNoChanges);
+			this.applyButton.setEnabled(!hasNoChanges);
 			this.cancelButton.setEnabled(!hasNoChanges);
 		}
 	}
