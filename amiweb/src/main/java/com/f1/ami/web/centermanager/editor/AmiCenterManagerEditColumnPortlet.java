@@ -1,6 +1,7 @@
 package com.f1.ami.web.centermanager.editor;
 
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -539,7 +540,9 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		sb.append("CREATE PUBLIC TABLE ").append(tableNameField.getValue()).append('(');
 		//schema
 		Table t = this.columnMetadata.getTable().getTable();
-		for (Row row : t.getRows()) {
+		Iterator<Row> iter = t.getRows().iterator();
+		while (iter.hasNext()) {
+			Row row = iter.next();
 			String dataType = (String) row.get("dataType");
 			String columnName = (String) row.get("columnName");
 			sb.append(columnName).append(" ").append(dataType);
@@ -570,8 +573,10 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			String cacheVal = (String) row.get("cacheValue");
 			if (SH.is(cacheVal))
 				sb.append(' ').append(cacheVal);
-			sb.append(',');
+			if (iter.hasNext())
+				sb.append(',');
 		}
+		sb.append(')');
 		return sb.toString();
 	}
 
