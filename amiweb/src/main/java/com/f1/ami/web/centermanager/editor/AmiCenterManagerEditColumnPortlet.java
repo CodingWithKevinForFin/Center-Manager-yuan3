@@ -147,10 +147,10 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		editableColumnIds.put("columnName", new TableEditableColumn("columnName", WebColumnEditConfig.EDIT_TEXTFIELD));
 		editableColumnIds.put("dataType",
 				new TableEditableColumn("dataType",
-						Arrays.asList(new String[] { AmiConsts.TYPE_NAME_STRING, AmiConsts.TYPE_NAME_LONG, AmiConsts.TYPE_NAME_INTEGER, AmiConsts.TYPE_NAME_BYTE,
-								AmiConsts.TYPE_NAME_SHORT, AmiConsts.TYPE_NAME_DOUBLE, AmiConsts.TYPE_NAME_FLOAT, AmiConsts.TYPE_NAME_BOOLEAN, AmiConsts.TYPE_NAME_UTC,
-								AmiConsts.TYPE_NAME_UTCN, AmiConsts.TYPE_NAME_BINARY, AmiConsts.TYPE_NAME_ENUM, AmiConsts.TYPE_NAME_CHAR, AmiConsts.TYPE_NAME_BIGINT,
-								AmiConsts.TYPE_NAME_BIGDEC, AmiConsts.TYPE_NAME_COMPLEX, AmiConsts.TYPE_NAME_UUID })));
+						Arrays.asList(new String[] { AmiConsts.TYPE_NAME_STRING, AmiConsts.TYPE_NAME_ENUM, AmiConsts.TYPE_NAME_LONG, AmiConsts.TYPE_NAME_INTEGER,
+								AmiConsts.TYPE_NAME_BYTE, AmiConsts.TYPE_NAME_SHORT, AmiConsts.TYPE_NAME_DOUBLE, AmiConsts.TYPE_NAME_FLOAT, AmiConsts.TYPE_NAME_BOOLEAN,
+								AmiConsts.TYPE_NAME_UTC, AmiConsts.TYPE_NAME_UTCN, AmiConsts.TYPE_NAME_BINARY, AmiConsts.TYPE_NAME_ENUM, AmiConsts.TYPE_NAME_CHAR,
+								AmiConsts.TYPE_NAME_BIGINT, AmiConsts.TYPE_NAME_BIGDEC, AmiConsts.TYPE_NAME_COMPLEX, AmiConsts.TYPE_NAME_UUID })));
 		//editableColumnIds.put("options", new TableEditableColumn("options", WebColumnEditConfig.EDIT_TEXTFIELD));
 		editableColumnIds.put("noNull", new TableEditableColumn("noNull", WebColumnEditConfig.EDIT_CHECKBOX));
 		editableColumnIds.put("nobroadcast", new TableEditableColumn("nobroadcast", WebColumnEditConfig.EDIT_CHECKBOX));
