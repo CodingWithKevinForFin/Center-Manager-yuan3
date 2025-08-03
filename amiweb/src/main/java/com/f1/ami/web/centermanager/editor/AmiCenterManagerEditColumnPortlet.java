@@ -321,11 +321,98 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void onCellClicked(WebTable table, Row row, WebColumn col) {
-
 	}
 
 	@Override
 	public void onCellMousedown(WebTable table, Row row, WebColumn col) {
+	}
+
+	public static Tuple2<Integer, String> parseCacheValue(String s) {
+		Tuple2<Integer, String> cacheValue = new Tuple2<Integer, String>();
+		StringBuilder digitBuilder = new StringBuilder();
+		StringBuilder unitBuilder = new StringBuilder();
+		for (char c : s.toCharArray()) {
+			if (c == '"')
+				continue;
+			if (Character.isDigit(c))
+				digitBuilder.append(c);
+			else
+				unitBuilder.append(c);
+		}
+		cacheValue.setA(Integer.parseInt(digitBuilder.toString()));
+		cacheValue.setB(unitBuilder.toString());
+		return cacheValue;
+	}
+
+	private void setNoBroadCast(Map<String, String> m) {
+		FormPortletCheckboxField noBroadcastEditField = (FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("NoBroadcast");
+		Boolean noBroadcast = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.NOBROADCAST));
+		noBroadcastEditField.setValue(noBroadcast);
+		noBroadcastEditField.setDisabled(false);
+	}
+
+	private FormPortletCheckboxField getColumnOptionEditField(String name) {
+		return (FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName(name);
+	}
+
+	@Override
+	public void onSelectedChanged(FastWebTable fastWebTable) {
+		Row activeRow = fastWebTable.getActiveRow();
+		if (activeRow != null)
+			onRowSelected(activeRow);
+
+	}
+
+	@Override
+	public void onNoSelectedChanged(FastWebTable fastWebTable) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public void onScroll(int viewTop, int viewPortHeight, long contentWidth, long contentHeight) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public WebMenu createMenu(WebTable table) {
+		FastWebTable ftw = (FastWebTable) table;
+		BasicWebMenu m = new BasicWebMenu();
+		m.add(new BasicWebMenuLink("add_column", true, "add_column"));
+		if (ftw.getActiveRow() != null) {
+			int origRowPos = ftw.getActiveRow().getLocation();
+			String origColumnName = (String) ftw.getActiveRow().get("columnName");
+			m.add(new BasicWebMenuLink("Add Column Before " + origColumnName, true, "add_column_before_" + origColumnName));
+			m.add(new BasicWebMenuLink("Add Column After " + origColumnName, true, "add_column_after_" + origColumnName));
+			m.add(new BasicWebMenuLink("Drop Column", true, "drop_column_" + origColumnName));
+			return m;
+		}
+
+		return null;
+	}
+
+	@Override
+	public void onSpecialKeyPressed(FormPortlet formPortlet, FormPortletField<?> field, int keycode, int mask, int cursorPosition) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	public WebMenu createMenu(FormPortlet formPortlet, FormPortletField<?> field, int cursorPosition) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public void onContextMenu(FormPortlet portlet, String action, FormPortletField node) {
+		if ("add_column".equals(action)) {
+			insertEmptyRow();
+		}
+
+	}
+
+	public void onRowSelected(Row row) {
 		this.columnMetaDataEditForm.resetForm();
 		String dataType = (String) row.get("dataType");
 		String columnName = (String) row.get("columnName");
@@ -430,90 +517,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			default:
 				throw new NullPointerException();
 		}
-
-	}
-
-	public static Tuple2<Integer, String> parseCacheValue(String s) {
-		Tuple2<Integer, String> cacheValue = new Tuple2<Integer, String>();
-		StringBuilder digitBuilder = new StringBuilder();
-		StringBuilder unitBuilder = new StringBuilder();
-		for (char c : s.toCharArray()) {
-			if (c == '"')
-				continue;
-			if (Character.isDigit(c))
-				digitBuilder.append(c);
-			else
-				unitBuilder.append(c);
-		}
-		cacheValue.setA(Integer.parseInt(digitBuilder.toString()));
-		cacheValue.setB(unitBuilder.toString());
-		return cacheValue;
-	}
-
-	private void setNoBroadCast(Map<String, String> m) {
-		FormPortletCheckboxField noBroadcastEditField = (FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("NoBroadcast");
-		Boolean noBroadcast = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.NOBROADCAST));
-		noBroadcastEditField.setValue(noBroadcast);
-		noBroadcastEditField.setDisabled(false);
-	}
-
-	private FormPortletCheckboxField getColumnOptionEditField(String name) {
-		return (FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName(name);
-	}
-
-	@Override
-	public void onSelectedChanged(FastWebTable fastWebTable) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onNoSelectedChanged(FastWebTable fastWebTable) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void onScroll(int viewTop, int viewPortHeight, long contentWidth, long contentHeight) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public WebMenu createMenu(WebTable table) {
-		FastWebTable ftw = (FastWebTable) table;
-		BasicWebMenu m = new BasicWebMenu();
-		m.add(new BasicWebMenuLink("add_column", true, "add_column"));
-		if (ftw.getActiveRow() != null) {
-			int origRowPos = ftw.getActiveRow().getLocation();
-			String origColumnName = (String) ftw.getActiveRow().get("columnName");
-			m.add(new BasicWebMenuLink("Add Column Before " + origColumnName, true, "add_column_before_" + origColumnName));
-			m.add(new BasicWebMenuLink("Add Column After " + origColumnName, true, "add_column_after_" + origColumnName));
-			m.add(new BasicWebMenuLink("Drop Column", true, "drop_column_" + origColumnName));
-			return m;
-		}
-
-		return null;
-	}
-
-	@Override
-	public void onSpecialKeyPressed(FormPortlet formPortlet, FormPortletField<?> field, int keycode, int mask, int cursorPosition) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public WebMenu createMenu(FormPortlet formPortlet, FormPortletField<?> field, int cursorPosition) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void onContextMenu(FormPortlet portlet, String action, FormPortletField node) {
-		if ("add_column".equals(action)) {
-			insertEmptyRow();
-		}
-
 	}
 
 	@Override
