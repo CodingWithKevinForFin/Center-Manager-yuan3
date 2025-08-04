@@ -526,12 +526,14 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		StringBuilder sb = new StringBuilder();
 		String persisengine = tablePersistEngineField.getValue();
 		if (!AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE.equals(persisengine))
-			sb.append("PersistEngine = ").append(persisengine).append(' ');
+			sb.append("PersistEngine = ").append(SH.doubleQuote(persisengine)).append(' ');
 		if (!tableBroadCastField.getBooleanValue())
 			sb.append("NoBroadcast");
-		sb.append(" RefreshPeriodMs = ").append(SH.doubleQuote(tableRefreshPeriodMsField.getValue()));
+		if (SH.is(tableRefreshPeriodMsField.getValue()))
+			sb.append(" RefreshPeriodMs = ").append(SH.doubleQuote(tableRefreshPeriodMsField.getValue()));
 		sb.append(" OnUndefColumn = ").append(SH.doubleQuote(tableOnUndefColumnField.getValue()));
-		sb.append(" InitialCapacity = ").append(SH.doubleQuote(tableInitialCapacityField.getValue())).append(';');
+		if (SH.is(tableInitialCapacityField.getValue()))
+			sb.append(" InitialCapacity = ").append(SH.doubleQuote(tableInitialCapacityField.getValue())).append(';');
 		return sb.toString();
 	}
 
@@ -744,6 +746,12 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 		}
 
+	}
+
+	@Override
+	public String previewEdit() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

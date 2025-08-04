@@ -126,7 +126,8 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 		} else if (button == this.resetButton) {
 			revertEdit();
 		} else if (button == this.applyButton) {
-			getManager().showDialog("Apply SQL", new AmiCenterManagerReviewApplyScriptPortlet(generateConfig()), 1000, 750);
+			String sql = isAdd ? previewScript() : previewEdit();
+			getManager().showDialog("Apply SQL", new AmiCenterManagerReviewApplyScriptPortlet(generateConfig(), sql), 1000, 750);
 
 		}
 	}
@@ -168,6 +169,8 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 			return preparePreUseClause() + " USE " + prepareUseClause();
 		return preparePreUseClause();
 	}
+
+	abstract public String previewEdit();
 
 	@Override
 	public void onFieldValueChanged(FormPortlet portlet, FormPortletField<?> field, Map<String, String> attributes) {

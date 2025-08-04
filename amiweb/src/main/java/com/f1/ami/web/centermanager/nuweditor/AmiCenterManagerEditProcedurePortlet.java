@@ -434,4 +434,10 @@ public class AmiCenterManagerEditProcedurePortlet extends AmiCenterManagerAbstra
 		service.sendRequestToBackend(this, request);
 	}
 
+	@Override
+	public String previewEdit() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

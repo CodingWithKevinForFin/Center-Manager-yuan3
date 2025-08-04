@@ -18,7 +18,7 @@ public class AmiCenterManagerReviewApplyScriptPortlet extends GridPortlet {
 	final private AmiCenterManagerReviewScriptPortlet reviewPortlet;
 	final private AmiCenterManagerApplyScriptPortlet applyPortlet;
 
-	public AmiCenterManagerReviewApplyScriptPortlet(PortletConfig config) {
+	public AmiCenterManagerReviewApplyScriptPortlet(PortletConfig config, String sql) {
 		super(config);
 		stepTree = new FastTreePortlet(generateConfig());
 		stepTree.setFormStyle(AmiWebUtils.getService(getManager()).getUserFormStyleManager());
@@ -29,6 +29,7 @@ public class AmiCenterManagerReviewApplyScriptPortlet extends GridPortlet {
 		applySqlNode = createNode(stepTree.getRoot(), "Apply SQL Script", null, null);
 		reviewSqlNode.setSelected(true);
 		reviewPortlet = new AmiCenterManagerReviewScriptPortlet(generateConfig(), this);
+		reviewPortlet.setSql(sql);
 		applyPortlet = new AmiCenterManagerApplyScriptPortlet(generateConfig(), this);
 
 		panelGrid = new GridPortlet(generateConfig());
@@ -52,6 +53,10 @@ public class AmiCenterManagerReviewApplyScriptPortlet extends GridPortlet {
 		reviewOrApplyPanel.setPortlet(applyPortlet);
 		reviewSqlNode.setSelected(false);
 		applySqlNode.setSelected(true);
+	}
+
+	public AmiCenterManagerApplyScriptPortlet getApplyPortlet() {
+		return applyPortlet;
 	}
 
 }

@@ -523,4 +523,10 @@ public class AmiCenterManagerEditTimerPortlet extends AmiCenterManagerAbstractEd
 		}
 	}
 
+	@Override
+	public String previewEdit() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

@@ -527,4 +527,10 @@ public class AmiCenterManagerEditTriggerPortlet extends AmiCenterManagerAbstract
 		service.sendRequestToBackend(this, request);
 	}
 
+	@Override
+	public String previewEdit() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
