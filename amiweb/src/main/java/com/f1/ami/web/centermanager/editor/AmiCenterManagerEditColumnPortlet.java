@@ -195,7 +195,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		setRowSize(1, 40);
 		div.setOffsetFromTopPx(500);
 		sendAuth();
-
 	}
 
 	@Override
@@ -209,7 +208,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	}
 
 	private void insertEmptyRow() {
-		this.columnMetadata.addRow(null, null, null, null, null);
+		this.columnMetadata.addRow(null, null, null, null, null, null, null, null, null, null, null, null, null);
 	}
 
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, String tableSql, AmiCenterGraphNode_Table correlationNode) {
@@ -328,6 +327,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			getManager().showDialog("Drop Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
 					AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
 			return;
+		} else if ("add_column".equals(action)) {
+			insertEmptyRow();
 		}
 
 	}
@@ -392,7 +393,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	public WebMenu createMenu(WebTable table) {
 		FastWebTable ftw = (FastWebTable) table;
 		BasicWebMenu m = new BasicWebMenu();
-		m.add(new BasicWebMenuLink("add_column", true, "add_column"));
+		m.add(new BasicWebMenuLink("Add Column", true, "add_column"));
 		if (ftw.getActiveRow() != null) {
 			int origRowPos = ftw.getActiveRow().getLocation();
 			String origColumnName = (String) ftw.getActiveRow().get("columnName");
@@ -402,7 +403,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			return m;
 		}
 
-		return null;
+		return m;
 	}
 
 	@Override
