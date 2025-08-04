@@ -35,6 +35,7 @@ import com.f1.suite.web.portal.impl.FastTablePortlet;
 import com.f1.suite.web.portal.impl.GridPortlet;
 import com.f1.suite.web.portal.impl.WebColumnEditConfig;
 import com.f1.suite.web.portal.impl.form.FormPortlet;
+import com.f1.suite.web.portal.impl.form.FormPortletButton;
 import com.f1.suite.web.portal.impl.form.FormPortletCheckboxField;
 import com.f1.suite.web.portal.impl.form.FormPortletField;
 import com.f1.suite.web.portal.impl.form.FormPortletSelectField;
@@ -195,6 +196,16 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		div.setOffsetFromTopPx(500);
 		sendAuth();
 
+	}
+
+	@Override
+	public void onButtonPressed(FormPortlet portlet, FormPortletButton button) {
+		if (button == this.cancelButton) {
+			//close the entire rich table editor
+			this.getParent().getParent().close();
+			return;
+		}
+		super.onButtonPressed(portlet, button);
 	}
 
 	private void insertEmptyRow() {
