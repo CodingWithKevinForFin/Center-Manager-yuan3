@@ -1,19 +1,14 @@
 package com.f1.ami.web.centermanager.portlets;
 
-import java.util.Map;
-
 import com.f1.ami.web.AmiWebUtils;
-import com.f1.suite.web.fastwebcolumns.FastWebColumns;
 import com.f1.suite.web.portal.PortletConfig;
 import com.f1.suite.web.portal.impl.DividerPortlet;
 import com.f1.suite.web.portal.impl.FastTreePortlet;
 import com.f1.suite.web.portal.impl.GridPortlet;
-import com.f1.suite.web.tree.WebTreeContextMenuListener;
 import com.f1.suite.web.tree.WebTreeNode;
 import com.f1.suite.web.tree.impl.FastWebTree;
-import com.f1.suite.web.tree.impl.FastWebTreeColumn;
 
-public class AmiCenterManagerReviewApplyScriptPortlet extends GridPortlet implements WebTreeContextMenuListener {
+public class AmiCenterManagerReviewApplyScriptPortlet extends GridPortlet {
 	final private FastTreePortlet stepTree;
 	final private WebTreeNode reviewSqlNode;
 	final private WebTreeNode applySqlNode;
@@ -28,13 +23,13 @@ public class AmiCenterManagerReviewApplyScriptPortlet extends GridPortlet implem
 		stepTree = new FastTreePortlet(generateConfig());
 		stepTree.setFormStyle(AmiWebUtils.getService(getManager()).getUserFormStyleManager());
 		stepTree.getTree().setRootLevelVisible(false);
-		stepTree.getTree().addMenuContextListener(this);
-		//TODO: add FastTree.hideSearch() js
+		stepTree.getTree().setSelectionMode(FastWebTree.SELECTION_MODE_NONE);
+		//TODO: add FastTree.hideSearch() js, disallow the user to select node
 		reviewSqlNode = createNode(stepTree.getRoot(), "Review SQL Script", null, null);
 		applySqlNode = createNode(stepTree.getRoot(), "Apply SQL Script", null, null);
 		reviewSqlNode.setSelected(true);
-		reviewPortlet = new AmiCenterManagerReviewScriptPortlet(generateConfig());
-		applyPortlet = new AmiCenterManagerApplyScriptPortlet(generateConfig());
+		reviewPortlet = new AmiCenterManagerReviewScriptPortlet(generateConfig(), this);
+		applyPortlet = new AmiCenterManagerApplyScriptPortlet(generateConfig(), this);
 
 		panelGrid = new GridPortlet(generateConfig());
 		reviewOrApplyPanel = panelGrid.addChild(reviewPortlet, 0, 0, 1, 1);
@@ -53,29 +48,10 @@ public class AmiCenterManagerReviewApplyScriptPortlet extends GridPortlet implem
 		return r;
 	}
 
-	@Override
-	public void onUserDblclick(FastWebColumns columns, String action, Map<String, String> properties) {
-	}
-
-	@Override
-	public void onContextMenu(FastWebTree tree, String action) {
-
-	}
-
-	@Override
-	public void onNodeClicked(FastWebTree tree, WebTreeNode node) {
-		if (node == reviewSqlNode)
-			reviewOrApplyPanel.setPortlet(reviewPortlet);
-		else if (node == applySqlNode)
-			reviewOrApplyPanel.setPortlet(applyPortlet);
-	}
-
-	@Override
-	public void onCellMousedown(FastWebTree tree, WebTreeNode start, FastWebTreeColumn col) {
-	}
-
-	@Override
-	public void onNodeSelectionChanged(FastWebTree fastWebTree, WebTreeNode node) {
+	public void moveToApplyStage() {
+		reviewOrApplyPanel.setPortlet(applyPortlet);
+		reviewSqlNode.setSelected(false);
+		applySqlNode.setSelected(true);
 	}
 
 }

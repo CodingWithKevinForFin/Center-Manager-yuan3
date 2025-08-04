@@ -12,12 +12,14 @@ import com.f1.suite.web.portal.impl.form.FormPortletListener;
 
 public class AmiCenterManagerApplyScriptPortlet extends GridPortlet implements FormPortletListener {
 	final private AmiWebHeaderPortlet header;
+	final private AmiCenterManagerReviewApplyScriptPortlet owner;
 	final private FormPortlet infoForm;
 	final private FormPortlet buttonsFp;
 	final private FormPortletButton finishButton;
 
-	public AmiCenterManagerApplyScriptPortlet(PortletConfig config) {
+	public AmiCenterManagerApplyScriptPortlet(PortletConfig config, AmiCenterManagerReviewApplyScriptPortlet parent) {
 		super(config);
+		owner = parent;
 		header = new AmiWebHeaderPortlet(generateConfig());
 		header.setInformationHeaderHeight(70);
 		header.updateBlurbPortletLayout("Applying SQL script to AMIDB", null);
@@ -38,7 +40,7 @@ public class AmiCenterManagerApplyScriptPortlet extends GridPortlet implements F
 	@Override
 	public void onButtonPressed(FormPortlet portlet, FormPortletButton button) {
 		if (button == this.finishButton) {
-			close();
+			owner.close();
 			return;
 		}
 	}

@@ -68,7 +68,7 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 	private FormPortletTitleField storageTitleField;
 
 	private FormPortletCheckboxField noNullEditField;
-	private FormPortletCheckboxField noBroadcastEditField;
+	private FormPortletCheckboxField broadcastEditField;
 
 	private FormPortletCheckboxField isEnumField;
 	private FormPortletCheckboxField isCacheField;
@@ -135,26 +135,30 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		storageTitleField.setLeftPosPx(LEFTPOS).setTopPosPx(130 + offset - 10).setWidthPx(400).setHeight(25);
 		//common fields
 		//ROW1
-		this.noNullEditField = new FormPortletCheckboxField(AmiConsts.NONULL);
-		this.noNullEditField.setName(AmiConsts.NONULL);
-		this.noNullEditField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
-		this.noBroadcastEditField = new FormPortletCheckboxField(AmiConsts.NOBROADCAST);
-		this.noBroadcastEditField.setName(AmiConsts.NOBROADCAST);
-		this.noBroadcastEditField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
+		noNullEditField = new FormPortletCheckboxField(AmiConsts.NONULL);
+		noNullEditField.setName(AmiConsts.NONULL);
+		noNullEditField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
+		broadcastEditField = new FormPortletCheckboxField(AmiConsts.NOBROADCAST);
+		broadcastEditField.setName(AmiConsts.NOBROADCAST);
+		if (mode == MODE_ADD) {
+			broadcastEditField.setDefaultValue(true);
+			broadcastEditField.setValue(true);
+		}
+		this.broadcastEditField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
 		if (mode == MODE_ADD) {
 			columnNameEditField.setDisabled(false);
 			dataTypeEditField.setDisabled(false);
 			noNullEditField.setDisabled(false);
-			noBroadcastEditField.setDisabled(false);
+			broadcastEditField.setDisabled(false);
 		} else {
 			columnNameEditField.setDisabled(true);
 			dataTypeEditField.setDisabled(true);
 			noNullEditField.setDisabled(true);
-			noBroadcastEditField.setDisabled(true);
+			broadcastEditField.setDisabled(true);
 		}
 
 		this.form.addField(noNullEditField);
-		this.form.addField(noBroadcastEditField);
+		this.form.addField(broadcastEditField);
 
 		//Data type specific fields
 		isEnumField = new FormPortletCheckboxField(AmiConsts.TYPE_NAME_ENUM);
@@ -248,7 +252,7 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		dataTypeEditField.setDisabled(true);
 		dataTypeEditField.setDefaultValue(AmiDatasourceColumn.TYPE_NONE);
 		noNullEditField.setDisabled(true).setValue(false);
-		noBroadcastEditField.setDisabled(true).setValue(false);
+		broadcastEditField.setDisabled(true).setValue(false);
 		isCacheField.setDisabled(true).setValue(false);
 		this.onIsCacheFieldChanged(isCacheField);
 		cacheValueField.setDisabled(true).setValue("");
@@ -304,7 +308,7 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		disableEnum(disabled);
 	}
 	public void disableCommonOptions(boolean disabled) {
-		noBroadcastEditField.setDisabled(disabled);
+		broadcastEditField.setDisabled(disabled);
 		noNullEditField.setDisabled(disabled);
 	}
 
@@ -673,7 +677,7 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		sb.append(" ").append(this.dataTypeEditField.getOption(this.dataTypeEditField.getValue()).getName());
 		//checking options
 		//1. first check nonull and nobroadcast
-		if (this.noBroadcastEditField.getBooleanValue())
+		if (this.broadcastEditField.getBooleanValue())
 			sb.append(" ").append(AmiConsts.NOBROADCAST);
 		if (this.noNullEditField.getBooleanValue())
 			sb.append(" ").append(AmiConsts.NONULL);
