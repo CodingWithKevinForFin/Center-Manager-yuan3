@@ -69,8 +69,6 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 	protected final FormPortletButton applyButton;
 	protected final FormPortletButton cancelButton;
 	protected final FormPortletButton resetButton;
-
-	protected final FormPortletButton diffButton;
 	protected final FormPortletButton importExportButton;
 	protected final static ObjectToJsonConverter JSON_CONVERTER = new ObjectToJsonConverter();
 	static {
@@ -107,7 +105,6 @@ public abstract class AmiCenterManagerAbstractEditCenterObjectPortlet extends Gr
 
 		this.applyButton = buttonsFp.addButton(new FormPortletButton("Apply"));
 		this.cancelButton = buttonsFp.addButton(new FormPortletButton("Cancel"));
-		this.diffButton = buttonsFp.addButton(new FormPortletButton("Diff"));
 		if (!isAdd)
 			this.resetButton = buttonsFp.addButton(new FormPortletButton("Reset"));
 		else
