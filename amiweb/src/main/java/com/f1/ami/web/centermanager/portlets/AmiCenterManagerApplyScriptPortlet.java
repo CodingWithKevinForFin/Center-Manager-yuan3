@@ -19,6 +19,7 @@ public class AmiCenterManagerApplyScriptPortlet extends GridPortlet implements F
 	final private FormPortlet infoForm;
 	final private HtmlPortlet messageLogForm;
 	final private FormPortlet buttonsFp;
+	final private FormPortletButton backButton;
 	final private FormPortletButton finishButton;
 
 	public AmiCenterManagerApplyScriptPortlet(PortletConfig config, AmiCenterManagerReviewApplyScriptPortlet parent) {
@@ -39,6 +40,8 @@ public class AmiCenterManagerApplyScriptPortlet extends GridPortlet implements F
 		buttonsFp = new FormPortlet(generateConfig());
 		buttonsFp.getFormPortletStyle().setLabelsWidth(200);
 		buttonsFp.addFormPortletListener(this);
+		backButton = buttonsFp.addButton(new FormPortletButton("Back"));
+		backButton.setEnabled(false);
 		finishButton = buttonsFp.addButton(new FormPortletButton("Finish"));
 		finishButton.setEnabled(false);
 		addChild(header, 0, 0);
@@ -53,6 +56,9 @@ public class AmiCenterManagerApplyScriptPortlet extends GridPortlet implements F
 	public void onButtonPressed(FormPortlet portlet, FormPortletButton button) {
 		if (button == this.finishButton) {
 			owner.close();
+			return;
+		} else if (button == this.backButton) {
+			owner.backToReviewStage();
 			return;
 		}
 	}
@@ -86,6 +92,10 @@ public class AmiCenterManagerApplyScriptPortlet extends GridPortlet implements F
 
 	public void enableFinishButton(boolean enabled) {
 		finishButton.setEnabled(enabled);
+	}
+
+	public void enableBackButton(boolean enabled) {
+		backButton.setEnabled(enabled);
 	}
 
 }

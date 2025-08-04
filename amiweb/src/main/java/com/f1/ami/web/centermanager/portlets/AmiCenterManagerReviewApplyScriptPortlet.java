@@ -59,4 +59,10 @@ public class AmiCenterManagerReviewApplyScriptPortlet extends GridPortlet {
 		return applyPortlet;
 	}
 
+	public void backToReviewStage() {
+		reviewOrApplyPanel.setPortlet(reviewPortlet);
+		reviewSqlNode.setSelected(true);
+		applySqlNode.setSelected(false);
+	}
+
 }

@@ -143,6 +143,8 @@ public class AmiCenterManagerReviewScriptPortlet extends GridPortlet implements 
 				appendOutput("#FFAAFF", sb.toString());
 			}
 		} else {
+			//if the response is not ok aka some errors occur, then enable back button
+			owner.getApplyPortlet().enableBackButton(true);
 			sb.setLength(0);
 			appendOutput("#ff4444", "\n" + response.getMessage() + "\n");
 			sb.setLength(0);
