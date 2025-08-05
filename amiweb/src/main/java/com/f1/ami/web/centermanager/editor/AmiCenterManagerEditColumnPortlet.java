@@ -1,10 +1,12 @@
 package com.f1.ami.web.centermanager.editor;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import com.f1.ami.amicommon.AmiConsts;
 import com.f1.ami.amicommon.AmiUtils;
@@ -62,22 +64,19 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		implements WebContextMenuListener, WebContextMenuFactory, FastTableEditListener {
 
 	final private AmiWebService service;
-
-	private FormPortlet tableInfoPortlet;
-
-	private FormPortletTextField tableNameField;
-	private FormPortletSelectField<String> tablePersistEngineField;
-	private FormPortletCheckboxField tableBroadCastField;
-	private FormPortletTextField tableRefreshPeriodMsField;
-	private FormPortletSelectField<String> tableOnUndefColumnField;
-	private FormPortletTextField tableInitialCapacityField;
-
+	final private FormPortlet tableInfoPortlet;
+	final private FormPortletTextField tableNameField;
+	final private FormPortletSelectField<String> tablePersistEngineField;
+	final private FormPortletCheckboxField tableBroadCastField;
+	final private FormPortletTextField tableRefreshPeriodMsField;
+	final private FormPortletSelectField<String> tableOnUndefColumnField;
+	final private FormPortletTextField tableInitialCapacityField;
 	final private FastTablePortlet columnMetadata;
 	final private FastTablePortlet userChangesTable;
 	private boolean enableColumnEditing = false;
 	private HasherMap<String, TableEditableColumn> editableColumnIds = new HasherMap<String, TableEditableColumn>();
-
-	private AmiCenterManagerColumnMetaDataEditForm columnMetaDataEditForm;
+	private Set<String> existingColNames = new HashSet<String>();
+	final private AmiCenterManagerColumnMetaDataEditForm columnMetaDataEditForm;
 
 	private static final String BG_GREY = "_bg=#4c4c4c";
 	private static final int LEFTPOS = 120;
@@ -87,14 +86,11 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		super(config, isAdd);
 		this.service = AmiWebUtils.getService(getManager());
 		PortletManager manager = service.getPortletManager();
-
 		tableInfoPortlet = new FormPortlet(manager.generateConfig());
 		//ROW1
 		tableNameField = tableInfoPortlet.addField(new FormPortletTextField("Table Name"));
 		tableNameField.setLeftPosPx(LEFTPOS).setTopPosPx(TOPPOS).setWidthPx(300).setHeightPx(DEFAULT_ROWHEIGHT);
-
 		if (!isAdd) {
-			//initColumnMetadata(tableName);
 			this.tableInfoPortlet.addField(enableEditingCheckbox);
 			enableEditingCheckbox.setLeftPosPx(LEFTPOS + 400).setTopPosPx(TOPPOS).setWidthPx(20).setHeightPx(20);
 		}
@@ -172,12 +168,10 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.columnMetadata.addOption(FastTablePortlet.OPTION_TITLE_DIVIDER_HIDDEN, true);
 		//add listener
 		this.columnMetadata.getTable().addMenuListener(this);
-		//have the ability to create and respond to menu items
 		this.columnMetadata.getTable().setMenuFactory(this);
 
 		this.userChangesTable = new FastTablePortlet(generateConfig(), new BasicTable(new Class<?>[] { String.class, String.class, String.class, String.class },
 				new String[] { "editObject", "editAttribute", "editType", "description" }), "User Changes");
-
 		this.userChangesTable.getTable().addColumn(true, "Edit Object", "editObject", fm.getBasicFormatter()).setWidth(100);
 		this.userChangesTable.getTable().addColumn(true, "Edit Attribute", "editAttribute", fm.getBasicFormatter()).setWidth(100);
 		this.userChangesTable.getTable().addColumn(true, "Edit Type", "editType", fm.getBasicFormatter()).setWidth(100);
@@ -194,7 +188,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.addChild(buttonsFp, 0, 1);
 		setRowSize(1, 40);
 		div.setOffsetFromTopPx(500);
-		sendAuth();
 	}
 
 	@Override
@@ -208,7 +201,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	}
 
 	private void insertEmptyRow() {
-		this.columnMetadata.addRow(null, null, null, null, null, null, null, null, null, null, null, null, null);
+		this.columnMetadata.addRow(null, null, null, false, false, false, false, false, false, false, false, null, -1);
 	}
 
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, String tableSql, AmiCenterGraphNode_Table correlationNode) {
@@ -237,13 +230,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			m.put(key, value);
 		}
 		return m;
-	}
-
-	private void sendAuth() {
-		AmiCenterQueryDsRequest request = prepareRequest();
-		if (request == null)
-			return;
-		service.sendRequestToBackend(this, request);
 	}
 
 	private void prepareRequestToBackend(String query) {
@@ -278,7 +264,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 				String cacheVal = storageOptions.get("Cache");
 				Boolean noNull = (Boolean) r.get("NoNull");
 				Integer position = (Integer) r.get("Position");
-				this.columnMetadata.addRow(columnName, dataType, options, noNull, noBroadcast, enm, compact, ascii, bitmap, ondisk, cache, cacheVal, position);
+				columnMetadata.addRow(columnName, dataType, options, noNull, noBroadcast, enm, compact, ascii, bitmap, ondisk, cache, cacheVal, position);
+				existingColNames.add(columnName);
 			}
 		}
 
@@ -758,6 +745,11 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 		}
 
+	}
+
+	public String getNextColumnName(String name) {
+		String columnName = SH.getNextId(name, existingColNames);
+		return columnName;
 	}
 
 	@Override
