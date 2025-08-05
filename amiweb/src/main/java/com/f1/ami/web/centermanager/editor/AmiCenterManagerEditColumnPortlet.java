@@ -662,7 +662,23 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		//finally call onRowSelected() to update the column info
 		if (editedTable.getRows().size() != 1)
 			throw new UnsupportedOperationException("Only one row is allowed to be edited at a time");
-		onRowSelected(editedTable.getRow(0));
+		Row r = editedTable.getRow(0);
+		for (Entry<String, Object> e : r.entrySet()) {
+			String key = e.getKey();
+			Object val = e.getValue();
+			if ("true".equals(val) || "false".equals(val)) {
+				boolean nuwVal = Caster_Boolean.INSTANCE.cast(val);
+			}
+			if ("columnName".equals(key)) {
+				FormPortletTextField colNameField = (FormPortletTextField) this.columnMetaDataEditForm.getForm().getFieldByName("columnName");
+				colNameField.setValue((String) val);
+			} else if ("dataType".equals(key)) {
+				FormPortletSelectField<Byte> dataTypeField = (FormPortletSelectField) this.columnMetaDataEditForm.getForm()
+						.getFieldByName(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_DATA_TYPE);
+				dataTypeField.setValue(AmiUtils.parseTypeName((String) val));
+			}
+		}
+
 	}
 
 	@Override
@@ -689,8 +705,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			}
 		} else
 			v2 = v;
-		//TODO: this is a workaround fix, 
-		//		final Object cast = col.getTypeCaster().cast(v2, false, false);
 		final Object cast = col.getTypeCaster().cast(v2, false, false);
 		if (y < this.columnMetadata.getTable().getRowsCount())
 			this.columnMetadata.getTable().getRow(y).putAt(col.getLocation(), cast);
