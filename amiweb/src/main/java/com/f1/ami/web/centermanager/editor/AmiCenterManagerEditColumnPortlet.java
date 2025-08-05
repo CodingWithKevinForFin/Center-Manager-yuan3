@@ -55,6 +55,7 @@ import com.f1.utils.casters.Caster_Boolean;
 import com.f1.utils.casters.Caster_String;
 import com.f1.utils.concurrent.HasherMap;
 import com.f1.utils.impl.CaseInsensitiveHasher;
+import com.f1.utils.string.ExpressionParserException;
 import com.f1.utils.string.sqlnode.CreateTableNode;
 import com.f1.utils.structs.Tuple2;
 import com.f1.utils.structs.table.BasicTable;
@@ -592,34 +593,38 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void importFromText(String text, StringBuilder sink) {
-		CreateTableNode cn = AmiCenterManagerUtils.scriptToCreateTableNode(text);
-		Map<String, String> tableConfig = AmiCenterManagerUtils.parseAdminNode_Table(cn);
-		String tableName = tableConfig.get("name");
-		tableNameField.setDefaultValue(tableName);
-		tableNameField.setValue(tableName);
-		initColumnMetadata(tableName);
-		for (Entry<String, String> e : tableConfig.entrySet()) {
-			String key = e.getKey();
-			String value = e.getValue();
-			if ("PersistEngine".equals(key)) {
-				String valueToSet = value == null ? AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE : value;
-				tablePersistEngineField.setValue(valueToSet);
-				tablePersistEngineField.setDefaultValue(valueToSet);
-			} else if ("BroadCast".equals(key)) {
-				Boolean boolVal = Caster_Boolean.INSTANCE.cast(value);
-				boolVal = boolVal == null ? true : boolVal;//dflt is true
-				tableBroadCastField.setValue(boolVal);
-				tableBroadCastField.setDefaultValue(boolVal);
-			} else if ("RefreshPeriodMs".equals(key)) {
-				tableRefreshPeriodMsField.setValue(value);
-				tableRefreshPeriodMsField.setDefaultValue(value);
-			} else if ("OnUndefColumn".equals(key)) {
-				tableOnUndefColumnField.setValue(value);
-				tableOnUndefColumnField.setDefaultValue(value);
-			} else if ("InitialCapacity".equals(key)) {
-				tableInitialCapacityField.setValue(value);
-				tableInitialCapacityField.setDefaultValue(value);
+		try {
+			CreateTableNode cn = AmiCenterManagerUtils.scriptToCreateTableNode(text);
+			Map<String, String> tableConfig = AmiCenterManagerUtils.parseAdminNode_Table(cn);
+			String tableName = tableConfig.get("name");
+			tableNameField.setDefaultValue(tableName);
+			tableNameField.setValue(tableName);
+			initColumnMetadata(tableName);
+			for (Entry<String, String> e : tableConfig.entrySet()) {
+				String key = e.getKey();
+				String value = e.getValue();
+				if ("PersistEngine".equals(key)) {
+					String valueToSet = value == null ? AmiCenterEntityConsts.PERSIST_ENGINE_TYPE_NONE : value;
+					tablePersistEngineField.setValue(valueToSet);
+					tablePersistEngineField.setDefaultValue(valueToSet);
+				} else if ("BroadCast".equals(key)) {
+					Boolean boolVal = Caster_Boolean.INSTANCE.cast(value);
+					boolVal = boolVal == null ? true : boolVal;//dflt is true
+					tableBroadCastField.setValue(boolVal);
+					tableBroadCastField.setDefaultValue(boolVal);
+				} else if ("RefreshPeriodMs".equals(key)) {
+					tableRefreshPeriodMsField.setValue(value);
+					tableRefreshPeriodMsField.setDefaultValue(value);
+				} else if ("OnUndefColumn".equals(key)) {
+					tableOnUndefColumnField.setValue(value);
+					tableOnUndefColumnField.setDefaultValue(value);
+				} else if ("InitialCapacity".equals(key)) {
+					tableInitialCapacityField.setValue(value);
+					tableInitialCapacityField.setDefaultValue(value);
+				}
 			}
+		} catch (ExpressionParserException e) {
+			AmiCenterManagerUtils.popDialog(service, e.toLegibleString(), "Error Importing Script");
 		}
 
 	}
