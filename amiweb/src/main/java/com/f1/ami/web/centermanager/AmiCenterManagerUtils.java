@@ -21,6 +21,8 @@ import com.f1.suite.web.portal.style.PortletStyleManager_Dialog;
 import com.f1.utils.OH;
 import com.f1.utils.SH;
 import com.f1.utils.casters.Caster_String;
+import com.f1.utils.concurrent.HasherMap;
+import com.f1.utils.impl.CaseInsensitiveHasher;
 import com.f1.utils.string.ExpressionParserException;
 import com.f1.utils.string.JavaExpressionParser;
 import com.f1.utils.string.Node;
@@ -40,7 +42,7 @@ import com.f1.utils.structs.MapInMap;
 import com.f1.utils.structs.Tuple2;
 
 public class AmiCenterManagerUtils {
-	public static HashMap<String, String> TABLE_CONFIG_MAP = new HashMap<String, String>();
+	public static HasherMap<String, String> TABLE_CONFIG_MAP = new HasherMap<String, String>(CaseInsensitiveHasher.INSTANCE);
 	public static MapInMap<String, String, String> TRIGGER_CONFIG_MAP = new MapInMap();
 	public static HashMap<String, String> TIMER_CONFIG_MAP = new HashMap<String, String>();
 	public static HashMap<String, String> PROCEDURE_CONFIG_MAP = new HashMap<String, String>();
@@ -199,7 +201,7 @@ public class AmiCenterManagerUtils {
 	}
 
 	public static Map<String, String> parseAdminNode_Table(CreateTableNode nodes) {
-		Map<String, String> fieldMap = new HashMap(TABLE_CONFIG_MAP);
+		Map<String, String> fieldMap = new HasherMap(CaseInsensitiveHasher.INSTANCE, TABLE_CONFIG_MAP);
 		AdminNode[] tableDefs = nodes.getTableDefs();
 		for (int n = 0; n < tableDefs.length; n++) {
 			AdminNode node = tableDefs[n];

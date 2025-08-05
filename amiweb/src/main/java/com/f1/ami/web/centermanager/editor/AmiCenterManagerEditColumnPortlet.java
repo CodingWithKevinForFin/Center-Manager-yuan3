@@ -62,6 +62,10 @@ import com.f1.utils.structs.table.SmartTable;
 
 public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractEditCenterObjectPortlet
 		implements WebContextMenuListener, WebContextMenuFactory, FastTableEditListener {
+	private static final String BG_GREY = "_bg=#4c4c4c";
+	private static final int LEFTPOS = 120;
+	private static final int TOPPOS = 20;
+	//private static final Map<String, String> caseInsensitiveOptions = 
 
 	final private AmiWebService service;
 	final private FormPortlet tableInfoPortlet;
@@ -77,10 +81,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	private HasherMap<String, TableEditableColumn> editableColumnIds = new HasherMap<String, TableEditableColumn>();
 	private Set<String> existingColNames = new HashSet<String>();
 	final private AmiCenterManagerColumnMetaDataEditForm columnMetaDataEditForm;
-
-	private static final String BG_GREY = "_bg=#4c4c4c";
-	private static final int LEFTPOS = 120;
-	private static final int TOPPOS = 20;
 
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, boolean isAdd) {
 		super(config, isAdd);
@@ -201,7 +201,10 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	}
 
 	private void insertEmptyRow() {
-		this.columnMetadata.addRow(null, null, null, false, false, false, false, false, false, false, false, null, -1);
+		String nextColName = getNextColumnName("new_column");
+		String dfltDataType = "String";
+		columnMetadata.addRow(nextColName, dfltDataType, null, false, false, false, false, false, false, false, false, null, -1);
+		existingColNames.add(nextColName);
 	}
 
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, String tableSql, AmiCenterGraphNode_Table correlationNode) {
