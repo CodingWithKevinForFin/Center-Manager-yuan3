@@ -66,7 +66,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	private static final String BG_GREY = "_bg=#4c4c4c";
 	private static final int LEFTPOS = 120;
 	private static final int TOPPOS = 20;
-	//private static final Map<String, String> caseInsensitiveOptions = 
 
 	final private AmiWebService service;
 	final private FormPortlet tableInfoPortlet;
@@ -254,11 +253,10 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			Table t = tables.get(0);
 			for (Row r : t.getRows()) {
 				String columnName = (String) r.get("ColumnName");
-				String dataType = (String) r.get("DataType");
+				String dataType = AmiUtils.toTypeName(AmiUtils.parseTypeName((String) r.get("DataType")));
 				String options = SH.noNull((String) r.get("Options"));//null is considered empty string
 				Map<String, String> storageOptions = parseOptions(options);
 				Boolean noBroadcast = storageOptions.containsKey("NoBroadcast");
-				//TODO: enum should go itto the options as well
 				Boolean enm = storageOptions.containsKey("Enum");
 				Boolean compact = storageOptions.containsKey("Compact");
 				Boolean ascii = storageOptions.containsKey("Ascii");
@@ -626,6 +624,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		} catch (ExpressionParserException e) {
 			AmiCenterManagerUtils.popDialog(service, e.toLegibleString(), "Error Importing Script");
 		}
+
+		//TODO: parse schema and populate table
 
 	}
 
