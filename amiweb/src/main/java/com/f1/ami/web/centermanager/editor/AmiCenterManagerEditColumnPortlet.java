@@ -12,7 +12,6 @@ import com.f1.ami.amicommon.AmiConsts;
 import com.f1.ami.amicommon.AmiUtils;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsRequest;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsResponse;
-import com.f1.ami.amicommon.msg.AmiDatasourceColumn;
 import com.f1.ami.web.AmiWebFormatterManager;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.AmiWebUtils;
@@ -52,7 +51,6 @@ import com.f1.suite.web.table.impl.NumberWebCellFormatter;
 import com.f1.suite.web.table.impl.WebCellStyleWrapperFormatter;
 import com.f1.utils.SH;
 import com.f1.utils.casters.Caster_Boolean;
-import com.f1.utils.casters.Caster_String;
 import com.f1.utils.concurrent.HasherMap;
 import com.f1.utils.impl.CaseInsensitiveHasher;
 import com.f1.utils.string.ExpressionParserException;
@@ -419,7 +417,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.columnMetaDataEditForm.resetForm();
 		String dataType = (String) row.get("dataType");
 		String columnName = (String) row.get("columnName");
-		String options = (String) row.get("options");
 		Boolean noNull = (Boolean) row.get("noNull");
 		Boolean nobroadcast = (Boolean) row.get("nobroadcast");
 		Boolean enm = (Boolean) row.get("enum");
@@ -439,87 +436,87 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		FormPortletCheckboxField f3 = (FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName(AmiConsts.NONULL);
 		f3.setValue(noNull);
 
-		Map<String, String> m = parseOptions(options);
-
-		//set the column cache
-		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_DATA_TYPE, dataType);
-		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_NAME, columnName);
-		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_NONULL, Caster_String.INSTANCE.cast(noNull));
-		for (Entry<String, String> e : m.entrySet()) {
-			this.columnMetaDataEditForm.setColumnCache(e.getKey(), e.getValue());
-		}
-
-		switch (AmiUtils.parseTypeName(dataType)) {
-			case AmiDatasourceColumn.TYPE_BIGDEC:
-			case AmiDatasourceColumn.TYPE_BIGINT:
-			case AmiDatasourceColumn.TYPE_BOOLEAN:
-			case AmiDatasourceColumn.TYPE_BYTE:
-			case AmiDatasourceColumn.TYPE_CHAR:
-			case AmiDatasourceColumn.TYPE_COMPLEX:
-			case AmiDatasourceColumn.TYPE_DOUBLE:
-			case AmiDatasourceColumn.TYPE_FLOAT:
-			case AmiDatasourceColumn.TYPE_INT:
-			case AmiDatasourceColumn.TYPE_LONG:
-			case AmiDatasourceColumn.TYPE_SHORT:
-			case AmiDatasourceColumn.TYPE_UTC:
-			case AmiDatasourceColumn.TYPE_UTCN:
-			case AmiDatasourceColumn.TYPE_UUID:
-				setNoBroadCast(m);
-				//enable common options
-				this.columnMetaDataEditForm.disableCommonOptions(false);
-				break;
-			case AmiDatasourceColumn.TYPE_STRING:
-				setNoBroadCast(m);
-				//enable common options
-				this.columnMetaDataEditForm.disableCommonOptions(false);
-
-				Boolean isCompact = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.COMPACT));
-				Boolean isAscii = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.ASCII));
-				Boolean isBitmap = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.BITMAP));
-				Boolean isOndisk = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.ONDISK));
-				Boolean isEnum = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.TYPE_NAME_ENUM));
-				boolean isCache = m.get(AmiConsts.CACHE) != null;
-				if (isCache) {
-					getColumnOptionEditField(AmiConsts.CACHE).setValue(true).setDisabled(false);
-					String rawCacheValue = (String) m.get(AmiConsts.CACHE);
-					int cacheValue = parseCacheValue(rawCacheValue).getA();
-					String cacheUnit = parseCacheValue(rawCacheValue).getB();
-					if (SH.isnt(cacheUnit))
-						cacheUnit = AmiConsts.CACHE_UNIT_DEFAULT_BYTE;
-					byte cacheUnitByte = AmiCenterManagerUtils.toCacheUnitCode(cacheUnit);
-					this.columnMetaDataEditForm.getCacheValueField().setValue(SH.toString(cacheValue));
-					this.columnMetaDataEditForm.getCacheUnitField().setValue(cacheUnitByte);
-				}
-				//enable edit for all string options
-				this.columnMetaDataEditForm.disableStringOptions(false);
-				if (isCompact != null && Boolean.TRUE.equals(isCompact)) {
-					getColumnOptionEditField(AmiConsts.COMPACT).setValue(true).setDisabled(false);
-					getColumnOptionEditField(AmiConsts.BITMAP).setDisabled(true);
-				}
-				if (isAscii != null && Boolean.TRUE.equals(isAscii)) {
-					getColumnOptionEditField(AmiConsts.ASCII).setValue(true).setDisabled(false);
-				}
-				if (isBitmap != null && Boolean.TRUE.equals(isBitmap)) {
-					getColumnOptionEditField(AmiConsts.BITMAP).setValue(true).setDisabled(false);
-					getColumnOptionEditField(AmiConsts.COMPACT).setDisabled(true);
-
-				}
-				if (isOndisk != null && Boolean.TRUE.equals(isOndisk)) {
-					getColumnOptionEditField(AmiConsts.ONDISK).setValue(true).setDisabled(false);
-				}
-				if (isEnum != null && Boolean.TRUE.equals(isEnum)) {
-					getColumnOptionEditField(AmiConsts.TYPE_NAME_ENUM).setValue(true).setDisabled(false);
-				}
-
-				break;
-			case AmiDatasourceColumn.TYPE_BINARY:
-				setNoBroadCast(m);
-				//enable common options
-				this.columnMetaDataEditForm.disableCommonOptions(false);
-				break;
-			default:
-				throw new NullPointerException();
-		}
+		//		Map<String, String> m = parseOptions(options);
+		//
+		//		//set the column cache
+		//		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_DATA_TYPE, dataType);
+		//		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_NAME, columnName);
+		//		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_NONULL, Caster_String.INSTANCE.cast(noNull));
+		//		for (Entry<String, String> e : m.entrySet()) {
+		//			this.columnMetaDataEditForm.setColumnCache(e.getKey(), e.getValue());
+		//		}
+		//
+		//		switch (AmiUtils.parseTypeName(dataType)) {
+		//			case AmiDatasourceColumn.TYPE_BIGDEC:
+		//			case AmiDatasourceColumn.TYPE_BIGINT:
+		//			case AmiDatasourceColumn.TYPE_BOOLEAN:
+		//			case AmiDatasourceColumn.TYPE_BYTE:
+		//			case AmiDatasourceColumn.TYPE_CHAR:
+		//			case AmiDatasourceColumn.TYPE_COMPLEX:
+		//			case AmiDatasourceColumn.TYPE_DOUBLE:
+		//			case AmiDatasourceColumn.TYPE_FLOAT:
+		//			case AmiDatasourceColumn.TYPE_INT:
+		//			case AmiDatasourceColumn.TYPE_LONG:
+		//			case AmiDatasourceColumn.TYPE_SHORT:
+		//			case AmiDatasourceColumn.TYPE_UTC:
+		//			case AmiDatasourceColumn.TYPE_UTCN:
+		//			case AmiDatasourceColumn.TYPE_UUID:
+		//				setNoBroadCast(m);
+		//				//enable common options
+		//				this.columnMetaDataEditForm.disableCommonOptions(false);
+		//				break;
+		//			case AmiDatasourceColumn.TYPE_STRING:
+		//				setNoBroadCast(m);
+		//				//enable common options
+		//				this.columnMetaDataEditForm.disableCommonOptions(false);
+		//
+		//				Boolean isCompact = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.COMPACT));
+		//				Boolean isAscii = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.ASCII));
+		//				Boolean isBitmap = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.BITMAP));
+		//				Boolean isOndisk = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.ONDISK));
+		//				Boolean isEnum = Caster_Boolean.INSTANCE.cast(m.get(AmiConsts.TYPE_NAME_ENUM));
+		//				boolean isCache = m.get(AmiConsts.CACHE) != null;
+		//				if (isCache) {
+		//					getColumnOptionEditField(AmiConsts.CACHE).setValue(true).setDisabled(false);
+		//					String rawCacheValue = (String) m.get(AmiConsts.CACHE);
+		//					int cacheValue = parseCacheValue(rawCacheValue).getA();
+		//					String cacheUnit = parseCacheValue(rawCacheValue).getB();
+		//					if (SH.isnt(cacheUnit))
+		//						cacheUnit = AmiConsts.CACHE_UNIT_DEFAULT_BYTE;
+		//					byte cacheUnitByte = AmiCenterManagerUtils.toCacheUnitCode(cacheUnit);
+		//					this.columnMetaDataEditForm.getCacheValueField().setValue(SH.toString(cacheValue));
+		//					this.columnMetaDataEditForm.getCacheUnitField().setValue(cacheUnitByte);
+		//				}
+		//				//enable edit for all string options
+		//				this.columnMetaDataEditForm.disableStringOptions(false);
+		//				if (isCompact != null && Boolean.TRUE.equals(isCompact)) {
+		//					getColumnOptionEditField(AmiConsts.COMPACT).setValue(true).setDisabled(false);
+		//					getColumnOptionEditField(AmiConsts.BITMAP).setDisabled(true);
+		//				}
+		//				if (isAscii != null && Boolean.TRUE.equals(isAscii)) {
+		//					getColumnOptionEditField(AmiConsts.ASCII).setValue(true).setDisabled(false);
+		//				}
+		//				if (isBitmap != null && Boolean.TRUE.equals(isBitmap)) {
+		//					getColumnOptionEditField(AmiConsts.BITMAP).setValue(true).setDisabled(false);
+		//					getColumnOptionEditField(AmiConsts.COMPACT).setDisabled(true);
+		//
+		//				}
+		//				if (isOndisk != null && Boolean.TRUE.equals(isOndisk)) {
+		//					getColumnOptionEditField(AmiConsts.ONDISK).setValue(true).setDisabled(false);
+		//				}
+		//				if (isEnum != null && Boolean.TRUE.equals(isEnum)) {
+		//					getColumnOptionEditField(AmiConsts.TYPE_NAME_ENUM).setValue(true).setDisabled(false);
+		//				}
+		//
+		//				break;
+		//			case AmiDatasourceColumn.TYPE_BINARY:
+		//				setNoBroadCast(m);
+		//				//enable common options
+		//				this.columnMetaDataEditForm.disableCommonOptions(false);
+		//				break;
+		//			default:
+		//				throw new NullPointerException();
+		//		}
 	}
 
 	@Override
@@ -662,6 +659,10 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			return;
 		}
 		this.columnMetadata.finishEdit();
+		//finally call onRowSelected() to update the column info
+		if (editedTable.getRows().size() != 1)
+			throw new UnsupportedOperationException("Only one row is allowed to be edited at a time");
+		onRowSelected(editedTable.getRow(0));
 	}
 
 	@Override
@@ -688,6 +689,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			}
 		} else
 			v2 = v;
+		//TODO: this is a workaround fix, 
+		//		final Object cast = col.getTypeCaster().cast(v2, false, false);
 		final Object cast = col.getTypeCaster().cast(v2, false, false);
 		if (y < this.columnMetadata.getTable().getRowsCount())
 			this.columnMetadata.getTable().getRow(y).putAt(col.getLocation(), cast);
