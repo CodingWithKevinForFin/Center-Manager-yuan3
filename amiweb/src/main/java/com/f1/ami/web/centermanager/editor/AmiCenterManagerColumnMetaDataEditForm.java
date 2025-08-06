@@ -136,10 +136,10 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		//common fields
 		//ROW1
 		noNullEditField = new FormPortletCheckboxField(AmiConsts.NONULL);
-		noNullEditField.setName(AmiConsts.NONULL);
+		noNullEditField.setName("noNull");
 		noNullEditField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
 		broadcastEditField = new FormPortletCheckboxField(AmiConsts.NOBROADCAST);
-		broadcastEditField.setName(AmiConsts.NOBROADCAST);
+		broadcastEditField.setName("nobroadcast");
 		if (mode == MODE_ADD) {
 			broadcastEditField.setDefaultValue(true);
 			broadcastEditField.setValue(true);
@@ -162,33 +162,33 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 
 		//Data type specific fields
 		isEnumField = new FormPortletCheckboxField(AmiConsts.TYPE_NAME_ENUM);
-		isEnumField.setName(AmiConsts.TYPE_NAME_ENUM);
+		isEnumField.setName("enum");
 		isEnumField.setLeftPosPx(LEFTPOS + 250).setTopPosPx(160 + offset).setWidthPx(20).setHeight(20);
 
 		//ROW2
 		isCompactField = new FormPortletCheckboxField(AmiConsts.COMPACT);
-		isCompactField.setName(AmiConsts.COMPACT);
+		isCompactField.setName("compact");
 		isCompactField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(200 + offset).setWidthPx(20).setHeight(20);
 		isAsciiField = new FormPortletCheckboxField(AmiConsts.ASCII);
-		isAsciiField.setName(AmiConsts.ASCII);
+		isAsciiField.setName("ascii");
 		isAsciiField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(200 + offset).setWidthPx(20).setHeight(20);
 		isBitmapField = new FormPortletCheckboxField(AmiConsts.BITMAP);
-		isBitmapField.setName(AmiConsts.BITMAP);
+		isBitmapField.setName("bitmap");
 		isBitmapField.setLeftPosPx(LEFTPOS + 250).setTopPosPx(200 + offset).setWidthPx(20).setHeight(20);
 
 		//ROW3
 		isOndiskField = new FormPortletCheckboxField(AmiConsts.ONDISK);
-		isOndiskField.setName(AmiConsts.ONDISK);
+		isOndiskField.setName("ondisk");
 		isOndiskField.setLeftPosPx(LEFTPOS - 30).setTopPosPx(240 + offset).setWidthPx(20).setHeight(20);
 
 		isCacheField = new FormPortletCheckboxField(AmiConsts.CACHE);
-		isCacheField.setName(AmiConsts.CACHE);
+		isCacheField.setName("cache");
 		isCacheField.setCorrelationData(AmiConsts.CACHE);
 		isCacheField.setLeftPosPx(LEFTPOS + 110).setTopPosPx(240 + offset).setWidthPx(20).setHeight(20);
 
 		cacheValueField = new FormPortletTextField("");
 		cacheValueField.setMaxChars(100);
-		cacheValueField.setName(VARNAME_CACHE_VALUE);
+		cacheValueField.setName("cacheValue");
 		cacheValueField.setCorrelationData(AmiConsts.CACHE);
 		cacheValueField.setLeftPosPx(LEFTPOS + 135).setTopPosPx(240 + offset).setWidthPx(50).setHeight(20);
 
@@ -274,6 +274,10 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		disableCommonOptions(!disabled);
 	}
 
+	public void disableAll(boolean disabled) {
+
+	}
+
 	public void disableCache(boolean disabled) {
 		isCacheField.setDisabled(disabled);
 	}
@@ -310,6 +314,38 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 	public void disableCommonOptions(boolean disabled) {
 		broadcastEditField.setDisabled(disabled);
 		noNullEditField.setDisabled(disabled);
+	}
+
+	//falsify an option when it is disabled
+	public void onOptionDisabled(String option) {
+
+	}
+
+	public void onDataTypeChanged(byte dataType) {
+		switch (dataType) {
+			case AmiDatasourceColumn.TYPE_BIGDEC:
+			case AmiDatasourceColumn.TYPE_BIGINT:
+			case AmiDatasourceColumn.TYPE_BOOLEAN:
+			case AmiDatasourceColumn.TYPE_BYTE:
+			case AmiDatasourceColumn.TYPE_CHAR:
+			case AmiDatasourceColumn.TYPE_COMPLEX:
+			case AmiDatasourceColumn.TYPE_DOUBLE:
+			case AmiDatasourceColumn.TYPE_FLOAT:
+			case AmiDatasourceColumn.TYPE_INT:
+			case AmiDatasourceColumn.TYPE_LONG:
+			case AmiDatasourceColumn.TYPE_SHORT:
+			case AmiDatasourceColumn.TYPE_UTC:
+			case AmiDatasourceColumn.TYPE_UTCN:
+			case AmiDatasourceColumn.TYPE_UUID:
+				//enable common options
+				disableCommonOptions(false);
+				break;
+			case AmiDatasourceColumn.TYPE_STRING:
+				disableCommonOptions(false);
+				isCompactField.setDisabled(false);
+				onOptionDisabled("isCompact");
+
+		}
 	}
 
 	@Override

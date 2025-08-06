@@ -86,7 +86,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		PortletManager manager = service.getPortletManager();
 		tableInfoPortlet = new FormPortlet(manager.generateConfig());
 		//ROW1
-		tableNameField = tableInfoPortlet.addField(new FormPortletTextField("Table Name"));
+		tableNameField = tableInfoPortlet.addField(new FormPortletTextField(AmiCenterManagerUtils.formatRequiredField("Table Name")));
 		tableNameField.setLeftPosPx(LEFTPOS).setTopPosPx(TOPPOS).setWidthPx(300).setHeightPx(DEFAULT_ROWHEIGHT);
 		if (!isAdd) {
 			this.tableInfoPortlet.addField(enableEditingCheckbox);
@@ -430,22 +430,20 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		FormPortletTextField f1 = (FormPortletTextField) this.columnMetaDataEditForm.getForm().getFieldByName("columnName");
 		f1.setValue(columnName);
 
-		FormPortletSelectField f2 = (FormPortletSelectField) this.columnMetaDataEditForm.getForm().getFieldByName(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_DATA_TYPE);
+		FormPortletSelectField<Byte> f2 = (FormPortletSelectField) this.columnMetaDataEditForm.getForm().getFieldByName("dataType");
 		f2.setValue(AmiUtils.parseTypeName(dataType));
 
-		FormPortletCheckboxField f3 = (FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName(AmiConsts.NONULL);
-		f3.setValue(noNull);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("noNull")).setValue(noNull);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("nobroadcast")).setValue(nobroadcast);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("enum")).setValue(enm);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("compact")).setValue(compact);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("ascii")).setValue(ascii);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("bitmap")).setValue(bitmap);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("ondisk")).setValue(ondisk);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("bitmap")).setValue(bitmap);
+		((FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName("cache")).setValue(cache);
+		((FormPortletTextField) this.columnMetaDataEditForm.getForm().getFieldByName("cacheValue")).setValue(cacheVal);
 
-		//		Map<String, String> m = parseOptions(options);
-		//
-		//		//set the column cache
-		//		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_DATA_TYPE, dataType);
-		//		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_NAME, columnName);
-		//		this.columnMetaDataEditForm.setColumnCache(AmiCenterManagerColumnMetaDataEditForm.VARNAME_NONULL, Caster_String.INSTANCE.cast(noNull));
-		//		for (Entry<String, String> e : m.entrySet()) {
-		//			this.columnMetaDataEditForm.setColumnCache(e.getKey(), e.getValue());
-		//		}
-		//
 		//		switch (AmiUtils.parseTypeName(dataType)) {
 		//			case AmiDatasourceColumn.TYPE_BIGDEC:
 		//			case AmiDatasourceColumn.TYPE_BIGINT:
@@ -659,7 +657,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			return;
 		}
 		this.columnMetadata.finishEdit();
-		//finally call onRowSelected() to update the column info
 		if (editedTable.getRows().size() != 1)
 			throw new UnsupportedOperationException("Only one row is allowed to be edited at a time");
 		Row r = editedTable.getRow(0);
@@ -667,15 +664,19 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			String key = e.getKey();
 			Object val = e.getValue();
 			if ("true".equals(val) || "false".equals(val)) {
-				boolean nuwVal = Caster_Boolean.INSTANCE.cast(val);
-			}
-			if ("columnName".equals(key)) {
+				boolean boolVal = Caster_Boolean.INSTANCE.cast(val);
+				FormPortletCheckboxField f = (FormPortletCheckboxField) this.columnMetaDataEditForm.getForm().getFieldByName(key);
+				f.setValue(boolVal);
+			} else if ("columnName".equals(key)) {
 				FormPortletTextField colNameField = (FormPortletTextField) this.columnMetaDataEditForm.getForm().getFieldByName("columnName");
 				colNameField.setValue((String) val);
 			} else if ("dataType".equals(key)) {
 				FormPortletSelectField<Byte> dataTypeField = (FormPortletSelectField) this.columnMetaDataEditForm.getForm()
 						.getFieldByName(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_DATA_TYPE);
 				dataTypeField.setValue(AmiUtils.parseTypeName((String) val));
+			} else if ("cacheValue".equals(key)) {
+				FormPortletTextField f = (FormPortletTextField) this.columnMetaDataEditForm.getForm().getFieldByName(key);
+				f.setValue((String) val);
 			}
 		}
 
