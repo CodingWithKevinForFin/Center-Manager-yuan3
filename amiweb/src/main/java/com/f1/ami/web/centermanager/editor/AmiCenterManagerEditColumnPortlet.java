@@ -660,6 +660,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		if (editedTable.getRows().size() != 1)
 			throw new UnsupportedOperationException("Only one row is allowed to be edited at a time");
 		Row r = editedTable.getRow(0);
+		Row origRow = origTable.getRow(0);
 		for (Entry<String, Object> e : r.entrySet()) {
 			String key = e.getKey();
 			Object val = e.getValue();
@@ -669,7 +670,14 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 				f.setValue(boolVal);
 			} else if ("columnName".equals(key)) {
 				FormPortletTextField colNameField = (FormPortletTextField) this.columnMetaDataEditForm.getForm().getFieldByName("columnName");
-				colNameField.setValue((String) val);
+				String curVal = (String) val;
+				String origColName = (String) origRow.get("columnName");
+				colNameField.setValue(curVal);
+				if (!SH.equals(origColName, curVal)) {
+					existingColNames.remove(origColName);
+					existingColNames.add(curVal);
+				}
+
 			} else if ("dataType".equals(key)) {
 				FormPortletSelectField<Byte> dataTypeField = (FormPortletSelectField) this.columnMetaDataEditForm.getForm()
 						.getFieldByName(AmiCenterManagerColumnMetaDataEditForm.VARNAME_COLUMN_DATA_TYPE);
