@@ -160,7 +160,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		editableColumnIds.put("cache", new TableEditableColumn("cache", WebColumnEditConfig.EDIT_CHECKBOX));
 		editableColumnIds.put("cacheValue", new TableEditableColumn("cacheValue", WebColumnEditConfig.EDIT_TEXTFIELD));
 
-		this.columnMetadata.getTable().sortRows("position", true, true, false);
 		this.columnMetadata.setDialogStyle(AmiWebUtils.getService(getManager()).getUserDialogStyleManager());
 		this.columnMetadata.addOption(FastTablePortlet.OPTION_TITLE_BAR_COLOR, "#6f6f6f");
 		this.columnMetadata.addOption(FastTablePortlet.OPTION_TITLE_DIVIDER_HIDDEN, true);
