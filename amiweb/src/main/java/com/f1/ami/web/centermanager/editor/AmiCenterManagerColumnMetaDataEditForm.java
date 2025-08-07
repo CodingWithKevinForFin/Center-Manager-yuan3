@@ -275,7 +275,14 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 	}
 
 	public void disableAll(boolean disabled) {
-
+		broadcastEditField.setDisabled(disabled);
+		noNullEditField.setDisabled(disabled);
+		disableCache(disabled);
+		disableOnDisk(disabled);
+		disableAscii(disabled);
+		disableBitmap(disabled);
+		disableCompact(disabled);
+		disableEnum(disabled);
 	}
 
 	public void disableCache(boolean disabled) {

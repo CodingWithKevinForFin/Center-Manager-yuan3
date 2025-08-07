@@ -177,6 +177,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		DividerPortlet div1 = new DividerPortlet(generateConfig(), false, this.userChangesTable, this.columnMetadata);
 
 		this.columnMetaDataEditForm = new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), null, AmiCenterManagerColumnMetaDataEditForm.MODE_EDIT);
+		this.columnMetaDataEditForm.resetForm();
 		GridPortlet formGrid = new GridPortlet(generateConfig());
 		formGrid.addChild(this.tableInfoPortlet, 0, 0, 1, 1);
 		formGrid.addChild(this.columnMetaDataEditForm, 0, 1, 1, 2);
@@ -414,7 +415,6 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	}
 
 	public void onRowSelected(Row row) {
-		this.columnMetaDataEditForm.resetForm();
 		String dataType = (String) row.get("dataType");
 		String columnName = (String) row.get("columnName");
 		Boolean noNull = (Boolean) row.get("noNull");
