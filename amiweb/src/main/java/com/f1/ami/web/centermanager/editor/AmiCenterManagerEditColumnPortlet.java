@@ -34,11 +34,14 @@ import com.f1.suite.web.portal.impl.DividerPortlet;
 import com.f1.suite.web.portal.impl.FastTableEditListener;
 import com.f1.suite.web.portal.impl.FastTablePortlet;
 import com.f1.suite.web.portal.impl.GridPortlet;
+import com.f1.suite.web.portal.impl.RootPortlet;
 import com.f1.suite.web.portal.impl.WebColumnEditConfig;
 import com.f1.suite.web.portal.impl.form.FormPortlet;
 import com.f1.suite.web.portal.impl.form.FormPortletButton;
 import com.f1.suite.web.portal.impl.form.FormPortletCheckboxField;
 import com.f1.suite.web.portal.impl.form.FormPortletField;
+import com.f1.suite.web.portal.impl.form.FormPortletListener;
+import com.f1.suite.web.portal.impl.form.FormPortletNumericRangeField;
 import com.f1.suite.web.portal.impl.form.FormPortletSelectField;
 import com.f1.suite.web.portal.impl.form.FormPortletTextField;
 import com.f1.suite.web.table.WebCellFormatter;
@@ -49,6 +52,7 @@ import com.f1.suite.web.table.WebTable;
 import com.f1.suite.web.table.fast.FastWebTable;
 import com.f1.suite.web.table.impl.NumberWebCellFormatter;
 import com.f1.suite.web.table.impl.WebCellStyleWrapperFormatter;
+import com.f1.utils.MH;
 import com.f1.utils.SH;
 import com.f1.utils.casters.Caster_Boolean;
 import com.f1.utils.concurrent.HasherMap;
@@ -319,18 +323,25 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			return;
 		} else if ("add_column".equals(action)) {
 			insertEmptyRow();
-		} else if ("move_up".equals(action) || "move_down".equals(action)) {
+		} else if ("move_up".equals(action) || "move_down".equals(action) || ("move_to".equals(action))) {
 			Row toMove = table.getSelectedRows().get(0);
 			int origSize = columnMetadata.getTable().getRowsCount();
 			int origLoc = toMove.getLocation();
 			Integer moveToIndex = null;
-			columnMetadata.removeRow(toMove);
 			if ("move_up".equals(action)) {
+				columnMetadata.removeRow(toMove);
 				moveToIndex = origLoc == 0 ? origSize - 1 : origLoc - 1;
 				columnMetadata.addRowAt(moveToIndex, toMove);
-			} else {
+			} else if ("move_down".equals(action)) {
+				columnMetadata.removeRow(toMove);
 				moveToIndex = origLoc == origSize - 1 ? 0 : origLoc + 1;
 				columnMetadata.addRowAt(moveToIndex, toMove);
+			} else {
+				InputsPortlet p = new InputsPortlet(generateConfig(), table.getSelectedRows().get(0), origSize - 1, origLoc);
+				RootPortlet root = (RootPortlet) this.service.getPortletManager().getRoot();
+				int width = MH.min(500, (int) (root.getWidth() * 0.4));
+				int height = MH.min(100, (int) (root.getHeight() * 0.4));
+				getManager().showDialog("Move Column To...", p, width, height);
 			}
 		}
 
@@ -359,6 +370,52 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		cacheValue.setA(Integer.parseInt(digitBuilder.toString()));
 		cacheValue.setB(unitBuilder.toString());
 		return cacheValue;
+	}
+
+	public class InputsPortlet extends GridPortlet implements FormPortletListener {
+
+		private Row row;
+		int origLoc;
+		private FormPortlet form;
+		private FormPortletNumericRangeField indexField;
+		private FormPortletButton cancelButton;
+		private FormPortletButton submitButton;
+
+		public InputsPortlet(PortletConfig config, Row row, int maxIndex, int origLoc) {
+			super(config);
+			this.row = row;
+			this.origLoc = origLoc;
+			this.form = new FormPortlet(generateConfig());
+			this.addChild(form);
+			this.indexField = this.form.addField(new FormPortletNumericRangeField("Move To Index: ", 0, maxIndex, 0));
+			this.form.addFormPortletListener(this);
+			this.submitButton = this.form.addButton(new FormPortletButton("Submit"));
+			this.cancelButton = this.form.addButton(new FormPortletButton("Cancel"));
+		}
+
+		@Override
+		public void onButtonPressed(FormPortlet portlet, FormPortletButton button) {
+			if (this.cancelButton == button)
+				close();
+			else {
+				int nuwPos = indexField.getValue().intValue();
+				if (nuwPos == origLoc) {
+					AmiCenterManagerUtils.popDialog(service, "The Row is already at position:" + nuwPos, "Error Moving Column");
+					return;
+				}
+				columnMetadata.removeRow(row);
+				columnMetadata.addRowAt(nuwPos, row);
+			}
+			close();
+		}
+
+		@Override
+		public void onFieldValueChanged(FormPortlet portlet, FormPortletField<?> field, Map<String, String> attributes) {
+		}
+
+		@Override
+		public void onSpecialKeyPressed(FormPortlet formPortlet, FormPortletField<?> field, int keycode, int mask, int cursorPosition) {
+		}
 	}
 
 	private void setNoBroadCast(Map<String, String> m) {
@@ -405,6 +462,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 					String origColumnName = (String) ftw.getActiveRow().get("columnName");
 					m.add(new BasicWebMenuLink("Move Up", true, "move_up"));
 					m.add(new BasicWebMenuLink("Move Down", true, "move_down"));
+					m.add(new BasicWebMenuLink("Move To Index...", true, "move_to"));
 					m.add(new BasicWebMenuLink("Add Column Before " + origColumnName, true, "add_column_before_" + origColumnName));
 					m.add(new BasicWebMenuLink("Add Column After " + origColumnName, true, "add_column_after_" + origColumnName));
 					break;
