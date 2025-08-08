@@ -308,12 +308,8 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			}
 			dialogTitle = "Add Column";
 		} else if (SH.startsWith(action, "drop_column_")) {
-			actionMode = AmiCenterManagerColumnMetaDataEditForm.ACTION_DROP;
-			targetColumnName = SH.afterFirst(action, "drop_column_");
-			dialogTitle = "Drop Column";
-			String query = "ALTER TABLE " + "foo" + " DROP " + targetColumnName;
-			getManager().showDialog("Drop Column", new AmiCenterManagerSubmitEditScriptPortlet(this.service, generateConfig(), query),
-					AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_WIDTH, AmiCenterManagerSubmitEditScriptPortlet.DEFAULT_PORTLET_HEIGHT);
+			for (Row r : table.getSelectedRows())
+				columnMetadata.removeRow(r);
 			return;
 		} else if ("add_column".equals(action)) {
 			insertEmptyRow();
