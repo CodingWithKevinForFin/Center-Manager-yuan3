@@ -319,6 +319,19 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 			return;
 		} else if ("add_column".equals(action)) {
 			insertEmptyRow();
+		} else if ("move_up".equals(action) || "move_down".equals(action)) {
+			Row toMove = table.getSelectedRows().get(0);
+			int origSize = columnMetadata.getTable().getRowsCount();
+			int origLoc = toMove.getLocation();
+			Integer moveToIndex = null;
+			columnMetadata.removeRow(toMove);
+			if ("move_up".equals(action)) {
+				moveToIndex = origLoc == 0 ? origSize - 1 : origLoc - 1;
+				columnMetadata.addRowAt(moveToIndex, toMove);
+			} else {
+				moveToIndex = origLoc == origSize - 1 ? 0 : origLoc + 1;
+				columnMetadata.addRowAt(moveToIndex, toMove);
+			}
 		}
 
 	}
@@ -390,15 +403,15 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 				case 1:
 					int origRowPos = ftw.getActiveRow().getLocation();
 					String origColumnName = (String) ftw.getActiveRow().get("columnName");
+					m.add(new BasicWebMenuLink("Move Up", true, "move_up"));
+					m.add(new BasicWebMenuLink("Move Down", true, "move_down"));
 					m.add(new BasicWebMenuLink("Add Column Before " + origColumnName, true, "add_column_before_" + origColumnName));
 					m.add(new BasicWebMenuLink("Add Column After " + origColumnName, true, "add_column_after_" + origColumnName));
 					break;
 				default:
 					break;
 			}
-			return m;
 		}
-
 		return m;
 	}
 
