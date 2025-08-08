@@ -208,6 +208,13 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		existingColNames.add(nextColName);
 	}
 
+	private void insertEmptyRowAt(int i) {
+		String nextColName = getNextColumnName("new_column");
+		String dfltDataType = "String";
+		columnMetadata.addRowAt(i, nextColName, dfltDataType, null, false, false, false, false, false, false, false, false, null, -1);
+		existingColNames.add(nextColName);
+	}
+
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, String tableSql, AmiCenterGraphNode_Table correlationNode) {
 		this(config, false);
 		this.correlationNode = correlationNode;
@@ -297,20 +304,16 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 	@Override
 	public void onContextMenu(WebTable table, String action) {
-		String targetColumnName = null;
-		byte actionMode = -1;
-		String dialogTitle = null;
 		if (SH.startsWith(action, "add_column_")) {
 			String temp = SH.afterFirst(action, "add_column_");
+			int loc = table.getSelectedRows().get(0).getLocation();
 			if (temp.startsWith("before")) {
-				actionMode = AmiCenterManagerColumnMetaDataEditForm.ACTION_ADD_BEFORE;
-				targetColumnName = SH.afterFirst(temp, "before_");
+				insertEmptyRowAt(loc);
 			} else if (temp.startsWith("after")) {
-				actionMode = AmiCenterManagerColumnMetaDataEditForm.ACTION_ADD_AFTER;
-				targetColumnName = SH.afterFirst(temp, "after_");
+				insertEmptyRowAt(loc + 1);
 			}
-			dialogTitle = "Add Column";
-		} else if (SH.startsWith(action, "drop_column_")) {
+
+		} else if ("drop_column".equals(action)) {
 			for (Row r : table.getSelectedRows())
 				columnMetadata.removeRow(r);
 			return;
@@ -382,11 +385,17 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		BasicWebMenu m = new BasicWebMenu();
 		m.add(new BasicWebMenuLink("Add Column", true, "add_column"));
 		if (ftw.getActiveRow() != null) {
-			int origRowPos = ftw.getActiveRow().getLocation();
-			String origColumnName = (String) ftw.getActiveRow().get("columnName");
-			m.add(new BasicWebMenuLink("Add Column Before " + origColumnName, true, "add_column_before_" + origColumnName));
-			m.add(new BasicWebMenuLink("Add Column After " + origColumnName, true, "add_column_after_" + origColumnName));
-			m.add(new BasicWebMenuLink("Drop Column", true, "drop_column_" + origColumnName));
+			m.add(new BasicWebMenuLink("Drop Column", true, "drop_column"));
+			switch (ftw.getSelectedRows().size()) {
+				case 1:
+					int origRowPos = ftw.getActiveRow().getLocation();
+					String origColumnName = (String) ftw.getActiveRow().get("columnName");
+					m.add(new BasicWebMenuLink("Add Column Before " + origColumnName, true, "add_column_before_" + origColumnName));
+					m.add(new BasicWebMenuLink("Add Column After " + origColumnName, true, "add_column_after_" + origColumnName));
+					break;
+				default:
+					break;
+			}
 			return m;
 		}
 
