@@ -188,6 +188,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.addChild(buttonsFp, 0, 1);
 		setRowSize(1, 40);
 		div.setOffsetFromTopPx(500);
+		tableInfoPortlet.addFormPortletListener(this);
 	}
 
 	@Override
@@ -569,7 +570,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 				sb.append(' ').append("Cache = ");
 			String cacheVal = (String) row.get("cacheValue");
 			if (SH.is(cacheVal))
-				sb.append(' ').append(cacheVal);
+				sb.append(' ').append(SH.doubleQuote(cacheVal));
 			if (iter.hasNext())
 				sb.append(',');
 		}
@@ -629,6 +630,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	@Override
 	public void onFieldValueChanged(FormPortlet portlet, FormPortletField<?> field, Map<String, String> attributes) {
 		super.onFieldValueChanged(portlet, field, attributes);
+		onFieldChanged(field);
 	}
 
 	@Override
@@ -716,7 +718,9 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		//Cache must used in conjunction with ondisk
 		if ("cache".equals(col.getId())) {
 			final Column ondiskCol = this.columnMetadata.getTable().getTable().getColumn("ondisk");
+			final Column cacheValCol = this.columnMetadata.getTable().getTable().getColumn("cacheValue");
 			ondiskCol.setValue(y, true);
+			cacheValCol.setValue(y, "2GB");
 		}
 
 		if (y < this.columnMetadata.getTable().getRowsCount())
