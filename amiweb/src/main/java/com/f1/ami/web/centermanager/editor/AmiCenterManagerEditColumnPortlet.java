@@ -79,6 +79,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	private HasherMap<String, TableEditableColumn> editableColumnIds = new HasherMap<String, TableEditableColumn>();
 	private Set<String> existingColNames = new HashSet<String>();
 	final private AmiCenterManagerColumnMetaDataEditForm columnMetaDataEditForm;
+	private String sql;
 
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, boolean isAdd) {
 		super(config, isAdd);
@@ -209,6 +210,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	public AmiCenterManagerEditColumnPortlet(PortletConfig config, String tableSql, AmiCenterGraphNode_Table correlationNode) {
 		this(config, false);
 		this.correlationNode = correlationNode;
+		this.sql = tableSql;
 		this.importFromText(tableSql, new StringBuilder());
 		enableEdit(false);
 	}
@@ -262,7 +264,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 				Boolean bitmap = storageOptions.containsKey("BITMAP");
 				Boolean ondisk = storageOptions.containsKey("OnDisk");
 				Boolean cache = storageOptions.containsKey("Cache");
-				String cacheVal = storageOptions.get("Cache");
+				String cacheVal = storageOptions.get("Cache") == null ? null : SH.replaceAll(storageOptions.get("Cache"), '"', "");
 				Boolean noNull = (Boolean) r.get("NoNull");
 				Integer position = (Integer) r.get("Position");
 				columnMetadata.addRow(columnName, dataType, options, noNull, noBroadcast, enm, compact, ascii, bitmap, ondisk, cache, cacheVal, position);
@@ -421,7 +423,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		Boolean bitmap = (Boolean) row.get("bitmap");
 		Boolean ondisk = (Boolean) row.get("ondisk");
 		Boolean cache = (Boolean) row.get("cache");
-		String cacheVal = (String) row.get("cacheValue");
+		String cacheVal = row.get("cacheValue") == null ? null : SH.replaceAll((String) row.get("cacheValue"), '"', "");
 		Integer position = (Integer) row.get("position");
 		FormPortletTextField f1 = (FormPortletTextField) this.columnMetaDataEditForm.getForm().getFieldByName("columnName");
 		f1.setValue(columnName);
@@ -711,6 +713,12 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		} else
 			v2 = v;
 		final Object cast = col.getTypeCaster().cast(v2, false, false);
+		//Cache must used in conjunction with ondisk
+		if ("cache".equals(col.getId())) {
+			final Column ondiskCol = this.columnMetadata.getTable().getTable().getColumn("ondisk");
+			ondiskCol.setValue(y, true);
+		}
+
 		if (y < this.columnMetadata.getTable().getRowsCount())
 			this.columnMetadata.getTable().getRow(y).putAt(col.getLocation(), cast);
 	}
@@ -786,6 +794,14 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	public String previewEdit() {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	protected void revertEdit() {
+		super.revertEdit();
+		//also revert the table
+		importFromText(sql, new StringBuilder());
+
 	}
 
 }

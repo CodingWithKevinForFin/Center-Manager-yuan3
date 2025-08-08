@@ -190,7 +190,7 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		cacheValueField.setMaxChars(100);
 		cacheValueField.setName("cacheValue");
 		cacheValueField.setCorrelationData(AmiConsts.CACHE);
-		cacheValueField.setLeftPosPx(LEFTPOS + 135).setTopPosPx(240 + offset).setWidthPx(50).setHeight(20);
+		cacheValueField.setLeftPosPx(LEFTPOS + 135).setTopPosPx(240 + offset).setWidthPx(70).setHeight(20);
 
 		cacheUnitField = new FormPortletSelectField<Byte>(Byte.class, "Unit");
 		cacheUnitField.setName(VARNAME_CACHE_UNIT);
@@ -210,7 +210,8 @@ public class AmiCenterManagerColumnMetaDataEditForm extends GridPortlet implemen
 		this.form.addField(isOndiskField);
 		this.form.addField(isCacheField);
 		this.form.addField(cacheValueField);
-		this.form.addField(cacheUnitField);
+		//not add cacheUnit for now
+		//this.form.addField(cacheUnitField);
 
 		//disable all the fields on init
 		disableCache(true);
