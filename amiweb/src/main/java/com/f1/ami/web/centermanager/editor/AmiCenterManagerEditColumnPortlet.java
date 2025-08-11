@@ -795,14 +795,42 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		} else
 			v2 = v;
 		final Object cast = col.getTypeCaster().cast(v2, false, false);
+
+		//Check mutual exclusiveness
+		final Column dataTypeCol = this.columnMetadata.getTable().getTable().getColumn("dataType");
+		final Column bitmapCol = this.columnMetadata.getTable().getTable().getColumn("bitmap");
+		final Column enumCol = this.columnMetadata.getTable().getTable().getColumn("enum");
+		final Column compactCol = this.columnMetadata.getTable().getTable().getColumn("compact");
+		final Column asciiCol = this.columnMetadata.getTable().getTable().getColumn("ascii");
+		final Column ondiskCol = this.columnMetadata.getTable().getTable().getColumn("ondisk");
+		final Column cacheValCol = this.columnMetadata.getTable().getTable().getColumn("cacheValue");
 		//Cache must used in conjunction with ondisk
-		if ("cache".equals(col.getId())) {
-			final Column ondiskCol = this.columnMetadata.getTable().getTable().getColumn("ondisk");
-			final Column cacheValCol = this.columnMetadata.getTable().getTable().getColumn("cacheValue");
+		if ("cache".equals(col.getId()) && "true".equals(v)) {
 			ondiskCol.setValue(y, true);
 			cacheValCol.setValue(y, "2GB");
 		}
+		//ONDISK can not be used in conjunction with other supplied directives,aka (isOndisk && (isAscii || isBitmap || isEnum)) should be disallowed
+		if ("ondisk".equals(col.getId()) && "true".equals(v)) {
+			asciiCol.setValue(y, false);
+			bitmapCol.setValue(y, false);
+			enumCol.setValue(y, false);
+		}
+		//BITMAP and COMPACT directive are mutually exclusive, aka disallow (isCompact && isBitmap)
+		if ("bitmap".equals(col.getId()) && "true".equals(v)) {
+			compactCol.setValue(y, false);
+		} else if ("compact".equals(col.getId()) && "true".equals(v)) {
+			bitmapCol.setValue(y, false);
+		}
 
+		//ASCII directive only supported for STRING columns with COMPACT option, aka disallow (isAscii && !isCompact)
+		if ("ascii".equals(col.getId()) && "true".equals(v)) {
+			compactCol.setValue(y, true);
+		}
+
+		//ONDISK directive only supported for STRING and BINARY columns
+		if ("ondisk".equals(col.getId()) && "true".equals(v) && !(dataTypeCol.getValue(y).equals("String") || dataTypeCol.getValue(y).equals("Binary"))) {
+			return;
+		}
 		if (y < this.columnMetadata.getTable().getRowsCount())
 			this.columnMetadata.getTable().getRow(y).putAt(col.getLocation(), cast);
 	}
