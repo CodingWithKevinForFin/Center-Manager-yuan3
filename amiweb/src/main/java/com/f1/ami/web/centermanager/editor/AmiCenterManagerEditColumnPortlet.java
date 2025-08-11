@@ -78,7 +78,7 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 	final private FormPortletSelectField<String> tableOnUndefColumnField;
 	final private FormPortletTextField tableInitialCapacityField;
 	final private FastTablePortlet columnMetadata;
-	final private FastTablePortlet userChangesTable;
+	final private FastTablePortlet userLogTable;
 	private boolean enableColumnEditing = false;
 	private HasherMap<String, TableEditableColumn> editableColumnIds = new HasherMap<String, TableEditableColumn>();
 	private Set<String> existingColNames = new HashSet<String>();
@@ -173,13 +173,12 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		this.columnMetadata.getTable().addMenuListener(this);
 		this.columnMetadata.getTable().setMenuFactory(this);
 
-		this.userChangesTable = new FastTablePortlet(generateConfig(), new BasicTable(new Class<?>[] { String.class, String.class, String.class, String.class },
-				new String[] { "editObject", "editAttribute", "editType", "description" }), "User Changes");
-		this.userChangesTable.getTable().addColumn(true, "Edit Object", "editObject", fm.getBasicFormatter()).setWidth(100);
-		this.userChangesTable.getTable().addColumn(true, "Edit Attribute", "editAttribute", fm.getBasicFormatter()).setWidth(100);
-		this.userChangesTable.getTable().addColumn(true, "Edit Type", "editType", fm.getBasicFormatter()).setWidth(100);
-		this.userChangesTable.getTable().addColumn(true, "Description", "description", fm.getBasicFormatter()).setWidth(550);
-		DividerPortlet div1 = new DividerPortlet(generateConfig(), false, this.userChangesTable, this.columnMetadata);
+		this.userLogTable = new FastTablePortlet(generateConfig(),
+				new BasicTable(new Class<?>[] { String.class, String.class, String.class }, new String[] { "type", "targetColumn", "description" }), "User Changes");
+		this.userLogTable.getTable().addColumn(true, "Type", "type", fm.getBasicFormatter()).setWidth(100);
+		this.userLogTable.getTable().addColumn(true, "Target Column", "targetColumn", fm.getBasicFormatter()).setWidth(100);
+		this.userLogTable.getTable().addColumn(true, "Description", "description", fm.getBasicFormatter()).setWidth(550);
+		DividerPortlet div1 = new DividerPortlet(generateConfig(), false, this.userLogTable, this.columnMetadata);
 
 		this.columnMetaDataEditForm = new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), null, AmiCenterManagerColumnMetaDataEditForm.MODE_EDIT);
 		this.columnMetaDataEditForm.resetForm();
