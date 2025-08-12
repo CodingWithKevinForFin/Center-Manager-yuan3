@@ -12,6 +12,7 @@ import com.f1.ami.amicommon.AmiConsts;
 import com.f1.ami.amicommon.AmiUtils;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsRequest;
 import com.f1.ami.amicommon.msg.AmiCenterQueryDsResponse;
+import com.f1.ami.amiscript.AmiDebugMessage;
 import com.f1.ami.web.AmiWebFormatterManager;
 import com.f1.ami.web.AmiWebService;
 import com.f1.ami.web.AmiWebUtils;
@@ -50,12 +51,14 @@ import com.f1.suite.web.table.WebContextMenuFactory;
 import com.f1.suite.web.table.WebContextMenuListener;
 import com.f1.suite.web.table.WebTable;
 import com.f1.suite.web.table.fast.FastWebTable;
+import com.f1.suite.web.table.impl.MapWebCellFormatter;
 import com.f1.suite.web.table.impl.NumberWebCellFormatter;
 import com.f1.suite.web.table.impl.WebCellStyleWrapperFormatter;
 import com.f1.utils.MH;
 import com.f1.utils.SH;
 import com.f1.utils.casters.Caster_Boolean;
 import com.f1.utils.concurrent.HasherMap;
+import com.f1.utils.formatter.BasicTextFormatter;
 import com.f1.utils.impl.CaseInsensitiveHasher;
 import com.f1.utils.string.ExpressionParserException;
 import com.f1.utils.string.sqlnode.CreateTableNode;
@@ -175,9 +178,15 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 
 		this.userLogTable = new FastTablePortlet(generateConfig(),
 				new BasicTable(new Class<?>[] { String.class, String.class, String.class }, new String[] { "type", "targetColumn", "description" }), "User Changes");
-		this.userLogTable.getTable().addColumn(true, "Type", "type", fm.getBasicFormatter()).setWidth(100);
+
+		MapWebCellFormatter typeFormatter = new MapWebCellFormatter(new BasicTextFormatter());
+		typeFormatter.addEntry(AmiDebugMessage.SEVERITY_INFO, "Debug", "_cna=portlet_icon_debug", "&nbsp;&nbsp;&nbsp;&nbsp;Info");
+		typeFormatter.addEntry(AmiDebugMessage.SEVERITY_WARNING, "Warning", "_cna=portlet_icon_warning", "&nbsp;&nbsp;&nbsp;&nbsp;Warning");
+
+		this.userLogTable.getTable().addColumn(true, "Type", "type", typeFormatter).setWidth(100);
 		this.userLogTable.getTable().addColumn(true, "Target Column", "targetColumn", fm.getBasicFormatter()).setWidth(100);
 		this.userLogTable.getTable().addColumn(true, "Description", "description", fm.getBasicFormatter()).setWidth(550);
+
 		DividerPortlet div1 = new DividerPortlet(generateConfig(), false, this.userLogTable, this.columnMetadata);
 
 		this.columnMetaDataEditForm = new AmiCenterManagerColumnMetaDataEditForm(generateConfig(), null, AmiCenterManagerColumnMetaDataEditForm.MODE_EDIT);
@@ -806,30 +815,29 @@ public class AmiCenterManagerEditColumnPortlet extends AmiCenterManagerAbstractE
 		//Cache must used in conjunction with ondisk
 		if ("cache".equals(col.getId()) && "true".equals(v)) {
 			ondiskCol.setValue(y, true);
-			cacheValCol.setValue(y, "2GB");
 		}
-		//ONDISK can not be used in conjunction with other supplied directives,aka (isOndisk && (isAscii || isBitmap || isEnum)) should be disallowed
-		if ("ondisk".equals(col.getId()) && "true".equals(v)) {
-			asciiCol.setValue(y, false);
-			bitmapCol.setValue(y, false);
-			enumCol.setValue(y, false);
-		}
-		//BITMAP and COMPACT directive are mutually exclusive, aka disallow (isCompact && isBitmap)
-		if ("bitmap".equals(col.getId()) && "true".equals(v)) {
-			compactCol.setValue(y, false);
-		} else if ("compact".equals(col.getId()) && "true".equals(v)) {
-			bitmapCol.setValue(y, false);
-		}
-
-		//ASCII directive only supported for STRING columns with COMPACT option, aka disallow (isAscii && !isCompact)
-		if ("ascii".equals(col.getId()) && "true".equals(v)) {
-			compactCol.setValue(y, true);
-		}
-
-		//ONDISK directive only supported for STRING and BINARY columns
-		if ("ondisk".equals(col.getId()) && "true".equals(v) && !(dataTypeCol.getValue(y).equals("String") || dataTypeCol.getValue(y).equals("Binary"))) {
-			return;
-		}
+		//		//ONDISK can not be used in conjunction with other supplied directives,aka (isOndisk && (isAscii || isBitmap || isEnum)) should be disallowed
+		//		if ("ondisk".equals(col.getId()) && "true".equals(v)) {
+		//			asciiCol.setValue(y, false);
+		//			bitmapCol.setValue(y, false);
+		//			enumCol.setValue(y, false);
+		//		}
+		//		//BITMAP and COMPACT directive are mutually exclusive, aka disallow (isCompact && isBitmap)
+		//		if ("bitmap".equals(col.getId()) && "true".equals(v)) {
+		//			compactCol.setValue(y, false);
+		//		} else if ("compact".equals(col.getId()) && "true".equals(v)) {
+		//			bitmapCol.setValue(y, false);
+		//		}
+		//
+		//		//ASCII directive only supported for STRING columns with COMPACT option, aka disallow (isAscii && !isCompact)
+		//		if ("ascii".equals(col.getId()) && "true".equals(v)) {
+		//			compactCol.setValue(y, true);
+		//		}
+		//
+		//		//ONDISK directive only supported for STRING and BINARY columns
+		//		if ("ondisk".equals(col.getId()) && "true".equals(v) && !(dataTypeCol.getValue(y).equals("String") || dataTypeCol.getValue(y).equals("Binary"))) {
+		//			return;
+		//		}
 		if (y < this.columnMetadata.getTable().getRowsCount())
 			this.columnMetadata.getTable().getRow(y).putAt(col.getLocation(), cast);
 	}
