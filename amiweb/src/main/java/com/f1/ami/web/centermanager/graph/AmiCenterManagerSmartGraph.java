@@ -40,14 +40,6 @@ import com.f1.utils.structs.LongKeyMap;
 
 public class AmiCenterManagerSmartGraph implements GraphListener, GraphContextMenuFactory, WebMenuListener {
 	private static final Logger log = LH.get();
-	//TODO: design/change these styles
-	//	private static final String STYLE_TABLE = "_cna=graph_node_table";
-	//	private static final String STYLE_TRIGGER = "_cna=graph_node_trigger";
-	//	private static final String STYLE_TIMER = "_cna=graph_node_timer";
-	//	private static final String STYLE_PROCEDURE = "_cna=graph_procedure";
-	//	private static final String STYLE_METHOD = "_cna=graph_node_method";
-	//	private static final String STYLE_DBO = "_cna=graph_node_dbo";
-	//	private static final String STYLE_INDEX = "_cna=graph_node_index";
 
 	//TODO: replace these with new icons
 	private static final String STYLE_TABLE = "_cna=graph_node_table";//"_cna=graph_node_rt_chartpanel";//"_cna=graph_node_table";
